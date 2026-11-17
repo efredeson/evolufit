@@ -29,12 +29,26 @@
     root.hidden = false;
     document.documentElement.classList.add("cloud-pending");
   };
+  function showWelcome() {
+    show();
+    root.innerHTML = '<div class="efm-auth-splash">'+
+      '<div class="efm-splash-mark"><img src="../assets/evolufit-gatinho-hd.webp" alt="Gatinho treinador EvoluFit"></div>'+
+      '<div class="efm-splash-wordmark">Evolu<span>Fit</span></div>'+
+      '<p class="efm-splash-slogan">Sua evolução é a missão</p>'+
+      '<div class="efm-splash-heart">⌁ ── ◆ ── ⌁</div>'+
+      '<div class="efm-splash-actions">'+
+      '<button class="cloud-primary" type="button" id="efm-enter">▶ ENTRAR</button>'+
+      '<button class="efm-splash-register" type="button" id="efm-signup">CRIAR CONTA</button>'+
+      '</div><p class="efm-splash-footnote">Treinos em casa • Caminhadas • Sua evolução</p></div>';
+    root.querySelector("#efm-enter").addEventListener("click", () => showForm("login"));
+    root.querySelector("#efm-signup").addEventListener("click", () => showForm("signup"));
+  }
   function formMarkup() {
     const recovery = mode === "recover";
     const update = mode === "update";
     const signup = mode === "signup";
     return '<div class="cloud-auth-panel"><img class="cloud-cat" src="../assets/evolufit-marca-hd.webp?v=5" alt="Mascote EvoluFit">' +
-      '<p class="cloud-slogan">Sua evolução, seu ritmo.</p>' +
+      '<p class="cloud-slogan">Sua evolução é a missão.</p>' +
       '<h1>' + (recovery?"Recuperar senha":update?"Nova senha":signup?"Criar minha conta":"Entrar no EvoluFit") + '</h1>' +
       '<p class="cloud-subtitle">Treinos em casa, caminhadas e seus hábitos em um espaço privado.</p>' +
       '<form id="auth-form" class="cloud-auth-form">' +
@@ -140,7 +154,7 @@
     pending = null;
     clearTimeout(saveTimer);
     app.setData(app.defaultData());
-    showForm("login");
+    showWelcome();
   }
   function decorateNav() {
     if (!api.active) return;
@@ -262,6 +276,6 @@
     if (error) throw error;
     if (recoveryPending) return showForm("update");
     if (data.session) return activate(data.session);
-    showForm("login");
+    showWelcome();
   }).catch(e=>fail(e.message || "Falha ao consultar sua sessão."));
 })();

@@ -33,8 +33,8 @@
     const recovery = mode === "recover";
     const update = mode === "update";
     const signup = mode === "signup";
-    return '<div class="cloud-auth-panel"><img class="cloud-cat" src="../assets/cat.webp" alt="Mascote EvoluFit">' +
-      '<div class="cloud-wordmark">Evolu<span>Fit</span></div><p class="cloud-slogan">Sua evolução, seu ritmo.</p>' +
+    return '<div class="cloud-auth-panel"><img class="cloud-cat" src="../assets/evolufit-logo-v2.svg" alt="Mascote EvoluFit">' +
+      '<p class="cloud-slogan">Sua evolução, seu ritmo.</p>' +
       '<h1>' + (recovery?"Recuperar senha":update?"Nova senha":signup?"Criar minha conta":"Entrar no EvoluFit") + '</h1>' +
       '<p class="cloud-subtitle">Treinos em casa, caminhadas e seus hábitos em um espaço privado.</p>' +
       '<form id="auth-form" class="cloud-auth-form">' +

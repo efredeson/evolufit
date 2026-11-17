@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="Prévia da organização interna do EvoluFit, sem alterar seus registros reais.">
+  <title>EvoluFit — Prévia de organização</title>
+  <base href="../">
+  <link rel="icon" type="image/svg+xml" href="assets/evolufit-symbol-amoled.svg">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="theme-neon.css">
+  <link rel="stylesheet" href="mission-ui.css">
+  <link rel="stylesheet" href="organizar/organize-ui.css">
+  <script src="ef-icons.js" defer></script>
+  <script src="organizar/app.js" defer></script>
+  <script src="mission-ui.js" defer></script>
+  <script src="organizar/organize-ui.js" defer></script>
+  <style>
+    .eforg-preview-marker{position:fixed;z-index:60;right:10px;bottom:calc(75px + env(safe-area-inset-bottom));font:700 11px "Oxanium",sans-serif;letter-spacing:.2px;background:#0b1709;border:1px solid #658f24;border-radius:999px;padding:5px 9px;color:#caff61;box-shadow:0 5px 17px #000a}
+    @media(min-width:761px){.eforg-preview-marker{bottom:10px}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside id="sidebar" class="sidebar"></aside>
+    <div class="bodyarea">
+      <header id="topbar" class="topbar"></header>
+      <main id="main" class="main" tabindex="-1"></main>
+    </div>
+  </div>
+  <div id="menu-overlay" class="ef-menu-backdrop" data-action="close-menu" aria-hidden="true"></div>
+  <nav id="bottomnav" class="bottomnav" aria-label="Menu rápido"></nav>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="modal" class="modal" hidden></div>
+  <div class="eforg-preview-marker">PRÉVIA · DADOS DE TESTE</div>
+  <script>
+  // Prevent the base URL from taking preview navigation back to the published site.
+  document.addEventListener('click', function(event) {
+    var link=event.target.closest('a[href^="#"]');
+    if(!link) return;
+    event.preventDefault();
+    var hash=link.getAttribute('href');
+    if(hash && hash !== '#' && location.hash !== hash) location.hash=hash;
+    else if(hash && hash !== '#') dispatchEvent(new HashChangeEvent('hashchange'));
+  },true);
+  </script>
+</body>
+</html>

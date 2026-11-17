@@ -1,5 +1,5 @@
-const CACHE="evolufit-static-2026-11-17-v1";
-const ASSETS=["./","./index.html","./styles.css","./app.js","./manifest.webmanifest","./assets/cat.webp"];
+const CACHE="evolufit-static-2026-11-17-v3-logo";
+const ASSETS=["./","./index.html","./styles.css","./app.js","./manifest.webmanifest","./assets/evolufit-mark-v2.svg"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener("fetch",e=>{

@@ -106,6 +106,17 @@ public class MainActivity extends Activity {
             catch(Exception ignored){}
         }).show();
     }
+    @Override public void onBackPressed(){
+        if("guia".equals(page)){
+            pauseClock();new AlertDialog.Builder(this).setTitle("Sair da missão?")
+                .setMessage("O treino em andamento não será registrado.")
+                .setNegativeButton("Continuar treino",(dialog,which)->render())
+                .setPositiveButton("Sair",(dialog,which)->{clockRunning=false;elapsedBefore=0;sessionElapsed=0;open("treinos");})
+                .show();return;
+        }
+        if(!"inicio".equals(page)){open("inicio");return;}
+        super.onBackPressed();
+    }
     @Override public void onDestroy(){handler.removeCallbacks(ticker);super.onDestroy();}
     private void save(){getSharedPreferences("evolufit-native-v1",MODE_PRIVATE).edit().putString("data",data.toString()).apply();}
     private JSONArray arr(String key){JSONArray a=data.optJSONArray(key);if(a==null){a=new JSONArray();try{data.put(key,a);}catch(Exception ignored){}}return a;}

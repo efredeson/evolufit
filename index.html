@@ -9,8 +9,13 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="assets/cat.webp" type="image/webp">
   <link rel="apple-touch-icon" href="assets/cat.webp">
+  <script src="config.js"></script>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="cloud.css">
+  <!-- Public, pinned browser SDK. Never embed service_role keys in this site. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0" defer></script>
   <script src="app.js" defer></script>
+  <script src="cloud.js" defer></script>
 </head>
 <body>
   <div class="shell">
@@ -23,6 +28,7 @@
   <nav id="bottomnav" class="bottomnav" aria-label="Menu rápido"></nav>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <div id="modal" class="modal" hidden></div>
+  <div id="auth-root" hidden aria-label="Acesso à conta EvoluFit"></div>
   <script>if('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(()=>{});</script>
 </body>
 </html>

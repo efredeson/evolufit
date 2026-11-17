@@ -48,31 +48,17 @@ function lastWeight(){return [...data.weights].sort((a,b)=>b.date.localeCompare(
 function title(t,sub,label="SUA JORNADA",right=""){
  return '<div class="pageheading"><div><div class="eyebrow">'+es(label)+'</div><h1>'+t+'</h1><p>'+sub+'</p></div>'+right+'</div>';
 }
-function stat(t,v,n,em){return '<article class="card animated"><div class="cardhead"><span class="statlabel">'+t+'</span><span class="circle">'+em+'</span></div><div class="statnum">'+v+'</div><div class="hint">'+n+'</div></article>';}
-function empty(t,sub,em="🌿"){return '<div class="empty"><div class="em">'+em+'</div><b>'+t+'</b><small>'+sub+'</small></div>';}
+function stat(t,v,n,em){
+ const key=/peso|altura/i.test(t)?'peso':/treino/i.test(t)?'treinos':/caminh/i.test(t)?'caminhadas':/refei/i.test(t)?'alimentacao':/imc/i.test(t)?'evolucao':/meta/i.test(t)?'meta':'evolucao';
+ return '<article class="card animated"><div class="cardhead"><span class="statlabel">'+t+'</span><span class="circle">'+uiIcon(key,28)+'</span></div><div class="statnum">'+v+'</div><div class="hint">'+n+'</div></article>';
+}
+function empty(t,sub,em="🌿"){return '<div class="empty"><div class="em">'+uiIcon("meta",38)+'</div><b>'+t+'</b><small>'+sub+'</small></div>';}
 function action(name,label,cls="btn",extra=""){return '<button class="'+cls+'" data-action="'+name+'" '+extra+'>'+label+'</button>';}
 
 const SITE_ASSET_BASE = location.pathname.includes("/beta/") ? "../" : "";
-const UI_ICONS = {
- inicio:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/>',
- treinos:'<path d="M3 9v6M7 6v12M17 6v12M21 9v6M7 12h10"/>',
- caminhadas:'<circle cx="13" cy="4.5" r="2"/><path d="m7 21 3-7 2-3m-5 0 5-3 4 3 3 1M12 11l-1 5 4 5"/>',
- alimentacao:'<path d="M5 3v8M8 3v8M11 3v8M5 8h6M8 11v10M18 3v18M18 3c-4 3-5 9 0 11"/>',
- evolucao:'<path d="M4 20V12h3v8M11 20V8h3v12M18 20V4h3v16"/>',
- fotos:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.6"/><path d="m4 18 5-5 4 3 3-4 5 6"/>',
- cronometro:'<circle cx="12" cy="13" r="8"/><path d="M12 13V8m0 5 3 2M9 2h6M19 5l2 2"/>',
- ajustes:'<circle cx="12" cy="8" r="3"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>',
- menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
- notificacoes:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 9h18c0-1-3-2-3-9ZM10 21h4"/>',
- bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 9h18c0-1-3-2-3-9ZM10 21h4"/>',
- calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v5M17 3v5M3 11h18"/>',
- check:'<path d="m4 12 5 5L20 6"/>',
- clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
-};
 function uiIcon(key,size=22){
-  return '<svg class="ui-icon" xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(UI_ICONS[key]||UI_ICONS.inicio)+'</svg>';
+ return window.EVOLUFIT_ICONS?.render(key,size)||'<span class="ef-icon-fallback" aria-hidden="true">✦</span>';
 }
-
 function nav(){
  const all = NAV.map((n,i)=>(i===5?'<div class="navtitle">MINHA JORNADA</div>':i===0?'<div class="navtitle">MENU PRINCIPAL</div>':'')+
  '<a href="#'+n[0]+'" class="navlink '+(view===n[0]?'active':'')+'">'+
@@ -115,7 +101,7 @@ function home(){
  const quick=[
  ['treinos','Treino'],['alimentacao','Alimentação'],['caminhadas','Caminhada'],['cronometro','Cronômetro']
  ].map(([k,label])=>'<a href="#'+k+'" class="ef-action">'+uiIcon(k,30)+'<span>'+label+'</span></a>').join('');
- const hero='<section class="hero ef-newhero"><div><small>💚 EVOLUFIT · SUA JORNADA</small>'+
+ const hero='<section class="hero ef-newhero"><div><small>EVOLUFIT · SUA JORNADA</small>'+
  '<h2>Seu treino, sua rotina,<br><em>sua evolução!</em></h2>'+
  '<p>Pequenos passos todos os dias. Vamos começar?</p>'+
  action("goto","Começar treino ▶","btn",'data-target="treinos"')+
@@ -179,22 +165,22 @@ function exerciseRow(step, index){
 function trainings(){
  const cards=PLANS.map(p=>{
  const preview={inicio:"cadeira",corpo:"agachamento",mob:"alongamento",energia:"polichinelo"}[p.id]||"marcha";
- return '<article class="card training animated"><div class="cardhead"><span class="symbol">'+p.emoji+'</span><span class="pill">'+p.level+'</span></div>'+
+ return '<article class="card training animated"><div class="cardhead"><span class="symbol">'+uiIcon(p.id==="mob"?"meta":p.id==="energia"?"cronometro":"treinos",31)+'</span><span class="pill">'+p.level+'</span></div>'+
  '<img class="plan-preview" src="'+exerciseImage(preview)+'" loading="lazy" alt="Exemplo ilustrado do treino">'+
  '<h3>'+p.title+'</h3><p>'+p.desc+'</p><div class="hint">⏱ '+p.time+' minutos · '+p.steps.length+' exercícios</div>'+
  action("open-training","Ver exercícios →","btn",'data-plan="'+p.id+'"')+'</article>';
 }).join("");
- const history=[...data.workouts].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,7).map(w=>'<div class="listitem"><span class="circle">✅</span><div class="grow"><strong>'+es(w.title)+'</strong><small>'+es(w.date)+' · '+w.minutes+' min</small></div></div>').join("");
+ const history=[...data.workouts].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,7).map(w=>'<div class="listitem"><span class="circle">'+uiIcon("check")+'</span><div class="grow"><strong>'+es(w.title)+'</strong><small>'+es(w.date)+' · '+w.minutes+' min</small></div></div>').join("");
  return title("Treinos em casa","Escolha um treino e adapte ao seu condicionamento. Não precisa de academia.")+'<div class="grid two">'+cards+'</div><section class="card" style="margin-top:20px"><h2>Treinos concluídos</h2>'+(history||empty("Nenhum treino registrado","Seu histórico de atividades aparecerá aqui.","🏃"))+'</section><p class="footnote">Movimentos demonstrativos. Respeite seus limites e interrompa se houver dor, tontura ou falta de ar incomum.</p>';
 }
 function walks(){
- const history=[...data.walks].sort((a,b)=>b.date.localeCompare(a.date)).map(w=>'<div class="listitem"><span class="circle">🚶</span><div class="grow"><strong>'+w.minutes+' minutos · '+(w.distance?fmt(w.distance)+" km":"distância não informada")+'</strong><small>'+es(w.date)+' · Ritmo '+es(w.pace)+'</small></div>'+action("remove-walk","Excluir","btn secondary small",'data-id="'+w.id+'"')+'</div>').join("");
+ const history=[...data.walks].sort((a,b)=>b.date.localeCompare(a.date)).map(w=>'<div class="listitem"><span class="circle">'+uiIcon("caminhadas")+'</span><div class="grow"><strong>'+w.minutes+' minutos · '+(w.distance?fmt(w.distance)+" km":"distância não informada")+'</strong><small>'+es(w.date)+' · Ritmo '+es(w.pace)+'</small></div>'+action("remove-walk","Excluir","btn secondary small",'data-id="'+w.id+'"')+'</div>').join("");
  const minutes=sameWeek(data.walks).reduce((s,w)=>s+w.minutes,0);
  return title("Minhas caminhadas","Registre seus passeios, ritmos e distâncias.", "ATIVIDADE AO AR LIVRE")+'<div class="grid two"><section class="card"><h2>Registrar caminhada</h2><form data-form="walk" class="formgrid"><div class="field"><label>Data</label><input name="date" type="date" max="'+today()+'" value="'+today()+'" required></div><div class="field"><label>Tempo (min)</label><input name="minutes" type="number" min="1" max="1440" placeholder="Ex: 30" required></div><div class="field"><label>Distância (km, opcional)</label><input name="distance" type="number" step="0.01" min="0" max="100" placeholder="Ex: 2.5"></div><div class="field"><label>Ritmo percebido</label><select name="pace"><option>Leve</option><option>Moderado</option><option>Intenso</option></select></div><div class="field full"><button class="btn">Salvar caminhada</button></div></form><p class="footnote">Tempo e distância são informados manualmente; esta versão não usa GPS.</p></section><section class="card"><h2>Resumo da semana</h2><div class="statnum">'+minutes+' min</div><p>Tempo acumulado nos últimos 7 dias</p><div class="progress"><span style="width:'+Math.min(100,minutes/150*100)+'%"></span></div><p class="footnote">150 minutos é apenas uma referência visual nesta demonstração, não uma meta pessoal obrigatória.</p></section></div><section class="card" style="margin-top:20px"><h2>Histórico</h2>'+(history||empty("Sem caminhadas ainda","Registre sua primeira caminhada.","🚶"))+'</section>';
 }
 function food(){
  const done=data.mealDone[today()]||[];
- const list=data.meals.slice().sort((a,b)=>a.time.localeCompare(b.time)).map(m=>'<div class="listitem"><div class="circle">🥗</div><div class="grow"><strong>'+es(m.name)+'</strong><small>⏰ '+es(m.time)+'</small></div><label class="mini"><input type="checkbox" data-action="meal-check" data-id="'+m.id+'" '+(done.includes(m.id)?"checked":"")+'> Feita</label>'+action("remove-meal","✕","btn secondary small",'data-id="'+m.id+'"')+'</div>').join("");
+ const list=data.meals.slice().sort((a,b)=>a.time.localeCompare(b.time)).map(m=>'<div class="listitem"><div class="circle">'+uiIcon("alimentacao")+'</div><div class="grow"><strong>'+es(m.name)+'</strong><small>⏰ '+es(m.time)+'</small></div><label class="mini"><input type="checkbox" data-action="meal-check" data-id="'+m.id+'" '+(done.includes(m.id)?"checked":"")+'> Feita</label>'+action("remove-meal","✕","btn secondary small",'data-id="'+m.id+'"')+'</div>').join("");
  return title("Alimentação & horários","Planeje suas refeições e acompanhe a rotina diária.","BEM-ESTAR",action("notify","🔔 Ativar lembretes","btn secondary"))+'<div class="grid two"><section class="card"><h2>Refeições de hoje <span class="pill">'+done.length+'/'+data.meals.length+'</span></h2>'+(list||empty("Sem refeições","Cadastre seus horários.","🍽️"))+'</section><section class="card"><h2>Adicionar horário</h2><form data-form="meal" class="formgrid"><div class="field"><label>Nome da refeição</label><input name="name" maxlength="45" placeholder="Ex: Lanche da tarde" required></div><div class="field"><label>Horário</label><input name="time" type="time" required></div><div class="field full"><button class="btn">Adicionar refeição</button></div></form><div class="notice" style="margin-top:20px">🔔 Os lembretes desta versão só aparecem enquanto o site estiver aberto e o navegador permitir notificações.</div></section></div><p class="footnote">Não há dietas prescritas nem metas calóricas automáticas nesta etapa.</p>';
 }
 function evolution(){
@@ -205,7 +191,7 @@ function evolution(){
  let chart=list.slice(-10);
  const min=Math.min(...chart.map(x=>x.weight),0),max=Math.max(...chart.map(x=>x.weight),1);
  const bars=chart.length?'<div class="chart">'+chart.map(x=>'<div><small>'+fmt(x.weight)+'</small><span class="bar" style="height:'+(20+(x.weight-Math.min(...chart.map(y=>y.weight)))/(Math.max(1,max-Math.min(...chart.map(y=>y.weight))))*110)+'px"></span><small>'+x.date.slice(5)+'</small></div>').join("")+'</div>':empty("Sem medições","Seus pesos aparecerão no gráfico.","📊");
- const items=list.slice().reverse().map(x=>'<div class="listitem"><span class="circle">⚖️</span><div class="grow"><strong>'+money(x.weight)+'</strong><small>'+es(x.date)+'</small></div>'+action("remove-weight","Excluir","btn secondary small",'data-id="'+x.id+'"')+'</div>').join("");
+ const items=list.slice().reverse().map(x=>'<div class="listitem"><span class="circle">'+uiIcon("peso")+'</span><div class="grow"><strong>'+money(x.weight)+'</strong><small>'+es(x.date)+'</small></div>'+action("remove-weight","Excluir","btn secondary small",'data-id="'+x.id+'"')+'</div>').join("");
  return title("Minha evolução","Seu histórico no seu ritmo — sem comparações com outras pessoas.","SEU PROGRESSO")+'<div class="grid cards">'+stat("Peso atual",current?money(current):"—","último registro","⚖️")+stat("Altura",data.profile.height?data.profile.height+" cm":"—","valor informado","📏")+stat("IMC",bmi||"—","indicador informativo","📐")+stat("Meta pessoal",target?money(target):"—",current&&target?"diferença: "+money(Math.abs(current-target)):"opcional","🎯")+'</div><div class="grid two"><section class="card"><h2>Registrar peso</h2><form data-form="weight" class="formgrid"><div class="field"><label>Peso (kg)</label><input type="number" name="weight" min="10" max="500" step="0.1" required></div><div class="field"><label>Data</label><input type="date" name="date" max="'+today()+'" value="'+today()+'" required></div><div class="field full"><button class="btn">Salvar registro</button></div></form><div class="notice" style="margin-top:18px">O IMC isolado não é diagnóstico nem determina quanto alguém deve emagrecer.</div></section><section class="card"><h2>Gráfico de peso</h2>'+bars+'</section></div><section class="card" style="margin-top:20px"><h2>Histórico de medidas</h2>'+(items||empty("Nenhum peso registrado","Você pode começar quando quiser.","⚖️"))+'</section>';
 }
 function photos(){

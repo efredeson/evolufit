@@ -5,6 +5,11 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.app.TimePickerDialog;
+import android.content.ContentValues;
+import android.net.Uri;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ColorDrawable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -33,6 +38,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.HorizontalScrollView;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.File;
@@ -42,21 +48,32 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.text.ParseException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Arrays;
 
 /** EvoluFit, real Android Views; no browser, PWA or WebView. */
 public class MainActivity extends Activity {
-    private static final int BLACK=0xff000000, PANEL=0xff071007, EDGE=0xff42692a,
-        GREEN=0xffbcff22, WHITE=0xfff3fff1, MUTED=0xffa6baa5, DANGER=0xffff9898;
+    private static final int BLACK=0xff000000, PANEL=0xff060c06, EDGE=0xff467124,
+        GREEN=0xffb9ff18, WHITE=0xfff7fff2, MUTED=0xffaac0a5, DANGER=0xffff9898,
+        MID=0xff132910, SOFT=0xff92eb29;
     private final Handler handler=new Handler(Looper.getMainLooper());
     private JSONObject data;
     private String page="inicio", plan="iniciante";
     private int exerciseIndex=0;
+    private long sessionElapsed=0L;
+    private boolean guideResting=false;
+    private String lastPage="inicio";
+    private static final int EXPORT_JSON=702;
     private LinearLayout content;
     private TextView timerValue;
+    private TextView liveTime;
     private boolean clockRunning=false, countdown=false;
     private long runningFrom=0L, elapsedBefore=0L, countdownTotal=300000L;
     private final Runnable ticker=new Runnable(){@Override public void run(){
         if(timerValue!=null) timerValue.setText(clockDisplay());
+        if(liveTime!=null)liveTime.setText("HORA ATUAL   "+new SimpleDateFormat("HH:mm:ss",Locale.getDefault()).format(new Date()));
         if(clockRunning&&countdown&&currentElapsed()>=countdownTotal){
             elapsedBefore=countdownTotal;clockRunning=false;toast("Tempo encerrado!");
         }
@@ -73,6 +90,21 @@ public class MainActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility(0);
         try{data=new JSONObject(getSharedPreferences("evolufit-native-v1",MODE_PRIVATE).getString("data","{}"));}catch(Exception e){data=new JSONObject();}
         handler.post(ticker);render();
+        if(!getSharedPreferences("evolufit-native-v1",MODE_PRIVATE).getBoolean("welcomeSeen",false)){
+            getSharedPreferences("evolufit-native-v1",MODE_PRIVATE).edit().putBoolean("welcomeSeen",true).apply();
+            handler.postDelayed(this::welcome,420);
+        }
+    }
+    private void welcome(){
+        EditText nickname=field("Como podemos chamar você? (opcional)",1);
+        nickname.setPadding(dp(22),dp(10),dp(18),dp(10));
+        new AlertDialog.Builder(this).setTitle("🐱 Bem-vindo ao EvoluFit!")
+        .setMessage("Sua evolução é a missão. Treine em casa e registre seu progresso, no seu ritmo.")
+        .setView(nickname).setNegativeButton("Pular",null)
+        .setPositiveButton("Começar",(d,w)->{
+            try{String n=nickname.getText().toString().trim();if(!n.isEmpty())data.put("name",n.substring(0,Math.min(n.length(),60)));save();render();}
+            catch(Exception ignored){}
+        }).show();
     }
     @Override public void onDestroy(){handler.removeCallbacks(ticker);super.onDestroy();}
     private void save(){getSharedPreferences("evolufit-native-v1",MODE_PRIVATE).edit().putString("data",data.toString()).apply();}
@@ -84,38 +116,57 @@ public class MainActivity extends Activity {
     private LinearLayout col(){LinearLayout a=new LinearLayout(this);a.setOrientation(1);return a;}
     private LinearLayout row(){LinearLayout a=new LinearLayout(this);a.setOrientation(0);a.setGravity(Gravity.CENTER_VERTICAL);return a;}
     private LinearLayout.LayoutParams lp(int w,int h,int margin){LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(w<0?w:dp(w),h<0?h:dp(h));p.setMargins(0,0,0,dp(margin));return p;}
-    private TextView text(String val,int size,int color,boolean heavy){TextView t=new TextView(this);t.setText(val);t.setTextSize(size);t.setTextColor(color);t.setGravity(Gravity.CENTER_VERTICAL);t.setTypeface(Typeface.create(heavy?"sans-serif-condensed":"sans-serif",heavy?Typeface.BOLD_ITALIC:Typeface.NORMAL));return t;}
+    private TextView text(String val,int size,int color,boolean heavy){TextView t=new TextView(this);t.setText(val);t.setTextSize(size);t.setTextColor(color);t.setGravity(Gravity.CENTER_VERTICAL);t.setTypeface(Typeface.create(heavy?"sans-serif-condensed-black":"sans-serif-medium",heavy?Typeface.BOLD_ITALIC:Typeface.NORMAL));return t;}
     private TextView button(String label,boolean bright,Runnable click){TextView b=text(label,19,bright?0xff102000:WHITE,true);b.setGravity(Gravity.CENTER);b.setBackground(bg(bright?GREEN:0xff111b11,bright?0xffcaff5f:EDGE,13));b.setPadding(dp(13),dp(12),dp(13),dp(12));b.setMinHeight(dp(47));b.setOnClickListener(v->click.run());return b;}
-    private LinearLayout card(){LinearLayout p=col();p.setBackground(bg(PANEL,EDGE,18));p.setPadding(dp(17),dp(17),dp(17),dp(17));return p;}
+    private LinearLayout card(){LinearLayout p=col();p.setBackground(bg(PANEL,EDGE,17));p.setPadding(dp(17),dp(17),dp(17),dp(17));return p;}
+    private TextView kicker(String s){TextView t=text(s,11,GREEN,true);t.setLetterSpacing(.10f);return t;}
+    private void rule(LinearLayout parent){View l=new View(this);l.setBackgroundColor(0xff284823);parent.addView(l,lp(-1,1,12));}
+    private void chips(LinearLayout parent,String... labels){LinearLayout r=row();for(String s:labels){TextView t=text(s,12,SOFT,true);t.setPadding(dp(9),dp(6),dp(9),dp(6));t.setBackground(bg(0xff11210c,EDGE,18));LinearLayout.LayoutParams p=lp(-2,-2,0);p.setMargins(0,0,dp(6),0);r.addView(t,p);}parent.addView(r,lp(-1,-2,11));}
+    private void greenBar(LinearLayout parent,int filled,int total){LinearLayout b=row();for(int i=0;i<total;i++){View block=new View(this);block.setBackground(bg(i<filled?GREEN:0xff1d3419,i<filled?SOFT:0xff365527,5));LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,dp(9),1);p.setMargins(dp(2),0,dp(2),0);b.addView(block,p);}parent.addView(b,lp(-1,-2,12));}
+    private boolean doneToday(String name){JSONArray a=arr("workouts");for(int i=0;i<a.length();i++){JSONObject o=a.optJSONObject(i);if(o!=null&&today().equals(o.optString("date"))&&name.equals(o.optString("name")))return true;}return false;}
+    private String selectedPlan(){String sel=data.optString("dailyPlan","iniciante");for(String[] p:PLANS)if(p[0].equals(sel))return sel;return "iniciante";}
+    private void chooseDailyMission(){String[] ids={"iniciante","mobilidade","corpo","energia"};String[] labels=new String[PLANS.length];int current=0;for(int i=0;i<PLANS.length;i++){labels[i]=PLANS[i][1];if(ids[i].equals(selectedPlan()))current=i;}
+        new AlertDialog.Builder(this).setTitle("Escolher minha missão").setSingleChoiceItems(labels,current,(d,w)->{try{data.put("dailyPlan",ids[w]);save();render();}catch(Exception ignored){}d.dismiss();}).setNegativeButton("Cancelar",null).show();}
+    private void confirmDelete(String title,Runnable action){new AlertDialog.Builder(this).setTitle(title).setMessage("Esta ação remove apenas o registro selecionado.").setNegativeButton("Cancelar",null).setPositiveButton("Excluir",(d,w)->action.run()).show();}
+    private void removeArrayItem(String key,int index){JSONArray old=arr(key),next=new JSONArray();for(int i=0;i<old.length();i++)if(i!=index)next.put(old.opt(i));try{data.put(key,next);save();render();}catch(Exception ignored){}}
+    private String dayString(String day){if(today().equals(day))return "HOJE";return day;}
+    private int activityCountThisWeek(){Calendar start=Calendar.getInstance();start.add(Calendar.DAY_OF_YEAR,-6);String first=new SimpleDateFormat("yyyy-MM-dd",Locale.US).format(start.getTime());Set<String> days=new HashSet<>();for(String key:new String[]{"walks","workouts"}){JSONArray a=arr(key);for(int i=0;i<a.length();i++){JSONObject o=a.optJSONObject(i);if(o!=null){String d=o.optString("date");if(d.compareTo(first)>=0&&d.compareTo(today())<=0)days.add(d);}}}return days.size();}
+    private void snack(String msg){toast(msg);}
+
     private void section(LinearLayout box,String title,String detail){box.addView(text(title,27,WHITE,true),lp(-1,-2,3));if(detail!=null&&!detail.isEmpty())box.addView(text(detail,14,MUTED,false),lp(-1,-2,13));}
     private void label(LinearLayout box,String value){box.addView(text(value,13,MUTED,false),lp(-1,-2,7));}
     private void addSpace(LinearLayout box,int h){View v=new View(this);box.addView(v,lp(1,h,0));}
     private void render(){
-        timerValue=null;
-        LinearLayout main=col();main.setBackgroundColor(BLACK);
-        main.setFitsSystemWindows(Build.VERSION.SDK_INT<30);
-        if(Build.VERSION.SDK_INT>=30)main.setOnApplyWindowInsetsListener((v,i)->{
-            android.graphics.Insets in=i.getInsets(WindowInsets.Type.systemBars());
-            v.setPadding(in.left,in.top,in.right,in.bottom);return i;
+        timerValue=null;liveTime=null;
+        LinearLayout root=col();root.setBackgroundColor(BLACK);
+        root.setFitsSystemWindows(Build.VERSION.SDK_INT<30);
+        if(Build.VERSION.SDK_INT>=30)root.setOnApplyWindowInsetsListener((v,i)->{
+            android.graphics.Insets in=i.getInsets(WindowInsets.Type.systemBars());v.setPadding(in.left,in.top,in.right,in.bottom);return i;
         });
-        setContentView(main);
-        LinearLayout header=row();header.setPadding(dp(17),dp(11),dp(16),dp(11));header.setBackgroundColor(BLACK);
-        TextView logo=text("Evolu",23,WHITE,true),fit=text("Fit",23,GREEN,true);
-        header.addView(logo);header.addView(fit);
-        TextView test=text("  •  ANDROID NATIVO",11,MUTED,true);
-        header.addView(test,new LinearLayout.LayoutParams(0,-2,1));
-        TextView bell=text("◉",27,GREEN,true);bell.setGravity(Gravity.RIGHT);bell.setOnClickListener(v->open("notificacoes"));header.addView(bell,lp(37,40,0));
-        main.addView(header,lp(-1,-2,0));
-        View line=new View(this);line.setBackgroundColor(EDGE);main.addView(line,lp(-1,1,0));
+        setContentView(root);
+        LinearLayout header=row();header.setPadding(dp(13),dp(8),dp(13),dp(8));header.setBackgroundColor(BLACK);
+        ImageView brand=image("mascot.webp",40);brand.setLayoutParams(new LinearLayout.LayoutParams(dp(42),dp(42)));header.addView(brand);
+        LinearLayout brandText=col();brandText.setPadding(dp(7),0,0,0);
+        TextView mark=text("EvoluFit",23,WHITE,true);android.text.SpannableString styled=new android.text.SpannableString("EvoluFit");
+        styled.setSpan(new android.text.style.ForegroundColorSpan(GREEN),5,8,0);mark.setText(styled);
+        brandText.addView(mark);brandText.addView(text("SUA EVOLUÇÃO É A MISSÃO",9,SOFT,true));
+        header.addView(brandText,new LinearLayout.LayoutParams(0,-2,1));
+        IconMark bell=new IconMark(this,"notificacoes",GREEN);bell.setOnClickListener(v->open("notificacoes"));
+        header.addView(bell,lp(33,33,0));root.addView(header,lp(-1,-2,0));
+        View line=new View(this);line.setBackgroundColor(EDGE);root.addView(line,lp(-1,1,0));
         ScrollView scroll=new ScrollView(this);scroll.setFillViewport(false);scroll.setClipToPadding(false);
-        content=col();content.setPadding(dp(15),dp(16),dp(15),dp(25));scroll.addView(content);
-        main.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
-        LinearLayout bottom=row();bottom.setPadding(dp(3),dp(7),dp(3),dp(7));bottom.setBackground(bg(0xff050905,EDGE,12));
+        content=col();content.setPadding(dp(13),dp(14),dp(13),dp(23));scroll.addView(content);
+        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
+        LinearLayout bottom=row();bottom.setPadding(dp(5),dp(6),dp(5),dp(6));bottom.setBackground(bg(BLACK,0xff4b7521,12));
         String[][] nav={{"inicio","Início"},{"treinos","Treinos"},{"evolucao","Evolução"},{"perfil","Perfil"}};
-        for(String[] item:nav){LinearLayout slot=col();slot.setGravity(Gravity.CENTER);slot.setPadding(dp(3),dp(5),dp(3),dp(5));boolean sel=page.equals(item[0]);
-            slot.setBackground(sel?bg(0xff1a3211,EDGE,11):bg(0xff010401,0,11));
-            slot.addView(new IconMark(this,item[0],sel?GREEN:MUTED),lp(27,27,2));TextView t=text(item[1],12,sel?GREEN:MUTED,sel);t.setGravity(Gravity.CENTER);slot.addView(t);slot.setOnClickListener(v->open(item[0]));bottom.addView(slot,new LinearLayout.LayoutParams(0,dp(57),1));}
-        main.addView(bottom,lp(-1,-2,0));
+        for(String[] item:nav){boolean sel=page.equals(item[0])||(page.equals("guia")&&item[0].equals("treinos"));
+            LinearLayout tab=col();tab.setGravity(Gravity.CENTER);tab.setBackground(bg(sel?0xff203914:BLACK,sel?GREEN:0,12));
+            tab.addView(new IconMark(this,item[0],sel?GREEN:0xffb1c4b2),lp(28,28,2));
+            TextView label=text(item[1],12,sel?GREEN:MUTED,sel);label.setGravity(Gravity.CENTER);tab.addView(label);
+            tab.setContentDescription("Abrir "+item[1]);tab.setOnClickListener(v->open(item[0]));
+            LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,dp(59),1);p.setMargins(dp(2),0,dp(2),0);bottom.addView(tab,p);
+        }
+        root.addView(bottom,lp(-1,-2,0));
         switch(page){
             case "inicio":home();break;case "treinos":trainings();break;case "guia":guide();break;
             case "caminhadas":walks();break;case "alimentacao":food();break;
@@ -141,53 +192,135 @@ public class MainActivity extends Activity {
     }
     private int count(String key){return arr(key).length();}
     private void home(){
-        LinearLayout hero=card();hero.addView(text("CENTRAL DE",30,WHITE,true));hero.addView(text("MISSÕES",47,GREEN,true));
-        String name=data.optString("name","").trim();hero.addView(text("Olá, "+(name.isEmpty()?"atleta":name)+"!",22,WHITE,true));
-        hero.addView(text("Sua evolução é a missão. Um passo de cada vez.",15,MUTED,false));
-        hero.addView(image("mascot.webp",220));content.addView(hero,lp(-1,-2,15));
-        LinearLayout mission=card();section(mission,"MISSÃO DO DIA","Comece com um treino leve em casa.");
-        mission.addView(text("Primeiros passos · 4 movimentos",18,WHITE,true),lp(-1,-2,15));
-        mission.addView(button("▶ COMEÇAR MISSÃO",true,()->{plan="iniciante";exerciseIndex=0;open("guia");}),lp(-1,-2,0));content.addView(mission,lp(-1,-2,17));
-        section(content,"ESCOLHA SUA ATIVIDADE",null);
+        String name=data.optString("name","").trim();String[] mission=planFor(selectedPlan());
+        LinearLayout hero=card();hero.setPadding(dp(11),dp(13),dp(8),dp(8));
+        LinearLayout cover=row();ImageView mascot=image("mascot.webp",151);cover.addView(mascot,new LinearLayout.LayoutParams(0,dp(158),.90f));
+        LinearLayout intro=col();intro.setGravity(Gravity.CENTER_VERTICAL);
+        intro.addView(kicker("◆ FOCO · DISCIPLINA"),lp(-1,-2,5));
+        intro.addView(text("CENTRAL DE",30,WHITE,true));intro.addView(text("MISSÕES",43,GREEN,true));
+        intro.addView(text("Olá, "+(name.isEmpty()?"atleta":name)+"!",20,WHITE,true),lp(-1,-2,3));
+        intro.addView(text("Vamos evoluir hoje?",13,MUTED,false));cover.addView(intro,new LinearLayout.LayoutParams(0,-1,1.2f));
+        hero.addView(cover);content.addView(hero,lp(-1,-2,12));
+        LinearLayout daily=card();daily.addView(kicker("MISSÃO DO DIA"),lp(-1,-2,5));
+        LinearLayout missionTitle=row();missionTitle.addView(new IconMark(this,"treinos",GREEN),lp(35,35,0));
+        LinearLayout nameBox=col();nameBox.setPadding(dp(12),0,0,0);nameBox.addView(text(mission[1],27,WHITE,true));
+        nameBox.addView(text("4 exercícios · tempo no seu ritmo",13,MUTED,false));missionTitle.addView(nameBox);
+        daily.addView(missionTitle,lp(-1,-2,12));
+        daily.addView(text(doneToday(mission[1])?"✓ Concluída hoje":"● Pronta para começar",14,SOFT,true),lp(-1,-2,9));
+        daily.addView(button("▶ COMEÇAR MISSÃO",true,()->startPlan(mission[0])),lp(-1,-2,8));
+        daily.addView(button("TROCAR MISSÃO",false,this::chooseDailyMission));content.addView(daily,lp(-1,-2,13));
+        section(content,"MINHAS ATIVIDADES",null);
         tiles(new String[][]{{"treinos","TREINOS"},{"caminhadas","CAMINHADAS"},{"alimentacao","ALIMENTAÇÃO"},{"cronometro","CRONÔMETRO"}});
-        LinearLayout progress=card();section(progress,"SUA EVOLUÇÃO","Conquistas reais, sem resultados inventados.");
-        progress.addView(text(count("workouts")+" treino(s) · "+count("walks")+" caminhada(s)",20,GREEN,true),lp(-1,-2,9));
-        progress.addView(button("VER MINHA EVOLUÇÃO",false,()->open("evolucao")));content.addView(progress,lp(-1,-2,0));
+        LinearLayout progress=card();section(progress,"PROGRESSO REAL","Últimos sete dias");
+        int days=activityCountThisWeek();progress.addView(text(days+" / 7 dias com atividade",23,GREEN,true),lp(-1,-2,11));
+        greenBar(progress,days,7);
+        progress.addView(text(count("workouts")+" treinos · "+count("walks")+" caminhadas registrados",14,MUTED,false),lp(-1,-2,14));
+        progress.addView(button("VER MINHA EVOLUÇÃO ›",false,()->open("evolucao")));content.addView(progress);
     }
+    private void startPlan(String which){plan=which;exerciseIndex=0;clockRunning=false;countdown=false;elapsedBefore=0;sessionElapsed=0;guideResting=false;open("guia");}
     private void tiles(String[][] items){for(int start=0;start<items.length;start+=2){LinearLayout r=row();for(int j=start;j<Math.min(start+2,items.length);j++){
         String[] it=items[j];LinearLayout t=card();t.setGravity(Gravity.CENTER);t.setPadding(dp(7),dp(10),dp(7),dp(10));
-        t.addView(new IconMark(this,it[0],GREEN),lp(43,43,8));TextView name=text(it[1],19,WHITE,true);name.setGravity(Gravity.CENTER);t.addView(name);
+        t.addView(new IconMark(this,it[0],GREEN),lp(46,46,8));TextView name=text(it[1],19,WHITE,true);name.setGravity(Gravity.CENTER);t.addView(name);
         t.setOnClickListener(v->open(it[0]));LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,dp(109),1);p.setMargins(dp(2),0,dp(7),dp(10));r.addView(t,p);
     }content.addView(r,lp(-1,-2,0));}}
     private String[] planFor(String id){for(String[] p:PLANS)if(p[0].equals(id))return p;return PLANS[0];}
-    private void trainings(){section(content,"TREINOS","Exercícios em casa, organizados por objetivo.");
-        for(String[] p:PLANS){LinearLayout c=card();c.addView(text(p[1],27,WHITE,true),lp(-1,-2,2));
-            c.addView(text("4 exercícios · tempo no seu ritmo",15,MUTED,false),lp(-1,-2,5));
-            c.addView(image(pic(p[2]),130));c.addView(button("INICIAR TREINO ›",true,()->{plan=p[0];exerciseIndex=0;clockRunning=false;elapsedBefore=0;open("guia");}));
-            content.addView(c,lp(-1,-2,13));}
-        label(content,"Histórico de treinos");JSONArray a=arr("workouts");if(a.length()==0)content.addView(text("Nenhum treino concluído ainda.",14,MUTED,false));
-        for(int i=a.length()-1;i>=Math.max(0,a.length()-6);i--){JSONObject o=a.optJSONObject(i);if(o!=null)content.addView(text("✓ "+o.optString("name")+" · "+o.optString("date"),16,WHITE,false),lp(-1,-2,9));}
+    private void trainings(){
+        section(content,"ESCOLHA SEU TREINO","Quatro missões adaptáveis para fazer em casa.");
+        for(String[] p:PLANS){LinearLayout c=card();LinearLayout heading=row();
+            LinearLayout headingText=col();headingText.addView(text(p[1].toUpperCase(Locale.ROOT),27,WHITE,true));
+            headingText.addView(text("4 movimentos · imagens passo a passo",13,MUTED,false));
+            heading.addView(headingText,new LinearLayout.LayoutParams(0,-2,1));
+            heading.addView(new IconMark(this,"treinos",GREEN),lp(31,31,0));c.addView(heading,lp(-1,-2,7));
+            ImageView picture=image(pic(p[2]),140);picture.setBackground(bg(0xff081208,EDGE,11));c.addView(picture);
+            c.addView(button("▶ INICIAR "+p[1].toUpperCase(Locale.ROOT),true,()->startPlan(p[0])));
+            content.addView(c,lp(-1,-2,14));
+        }
+        JSONArray logs=arr("workouts");LinearLayout history=card();section(history,"TREINOS CONCLUÍDOS",logs.length()+" registro(s)");
+        if(logs.length()==0)history.addView(text("O histórico aparece depois da sua primeira missão.",14,MUTED,false));
+        for(int i=logs.length()-1;i>=Math.max(0,logs.length()-12);i--){JSONObject o=logs.optJSONObject(i);if(o==null)continue;
+            final int idx=i;LinearLayout row=row();LinearLayout info=col();info.addView(text("✓ "+o.optString("name"),18,WHITE,true));
+            String length=o.has("seconds")?" · "+formatSeconds(o.optLong("seconds")):"";
+            info.addView(text(o.optString("date")+length,13,MUTED,false));row.addView(info,new LinearLayout.LayoutParams(0,-2,1));
+            row.addView(button("×",false,()->confirmDelete("Excluir treino?",()->removeArrayItem("workouts",idx))),lp(42,43,0));
+            history.addView(row,lp(-1,-2,10));
+        }content.addView(history,lp(-1,-2,10));
+        label(content,"Se sentir dor, tontura ou falta de ar incomum, interrompa a atividade.");
     }
-    private void guide(){String[] p=planFor(plan);String step=p[Math.min(exerciseIndex+2,p.length-1)];
-        section(content,"TREINO GUIADO",p[1]+" · passo "+(exerciseIndex+1)+" de 4");
-        LinearLayout c=card();c.addView(image(pic(step),245));c.addView(text(step,30,WHITE,true),lp(-1,-2,4));
-        c.addView(text("Observe as duas posições e execute devagar, sem dor.",15,MUTED,false),lp(-1,-2,12));
-        TextView clock=text(clockDisplay(),42,GREEN,true);clock.setGravity(Gravity.CENTER);timerValue=clock;c.addView(clock,lp(-1,85,12));
-        LinearLayout control=row();control.addView(button(clockRunning?"⏸ PAUSAR":"▶ INICIAR",true,()->{toggleClock();render();}),new LinearLayout.LayoutParams(0,dp(53),1));
-        c.addView(control,lp(-1,-2,12));LinearLayout next=row();
-        TextView prev=button("‹ ANTERIOR",false,()->{if(exerciseIndex>0){pauseClock();exerciseIndex--;render();}});next.addView(prev,new LinearLayout.LayoutParams(0,dp(47),1));
-        TextView nextBtn=button(exerciseIndex==3?"✓ CONCLUIR":"PRÓXIMO ›",false,()->{pauseClock();if(exerciseIndex==3){addLog("workouts",p[1]);clockRunning=false;elapsedBefore=0;open("treinos");toast("Missão concluída e registrada!");}else{exerciseIndex++;render();}});
-        LinearLayout.LayoutParams px=new LinearLayout.LayoutParams(0,dp(47),1);px.setMargins(dp(9),0,0,0);next.addView(nextBtn,px);c.addView(next);
-        content.addView(c,lp(-1,-2,12));
-        content.addView(button("SAIR DO TREINO",false,()->{pauseClock();open("treinos");}),lp(-1,-2,10));
-        label(content,"Respeite seus limites. Interrompa se houver dor, tontura ou falta de ar incomum.");
+    private String exerciseCue(String step){
+        String s=step.toLowerCase(Locale.ROOT);
+        if(s.contains("marcha"))return "Marcha no lugar, elevando os joelhos com conforto e alternando os braços.";
+        if(s.contains("sentar"))return "Use uma cadeira firme. Sente devagar e levante com controle.";
+        if(s.contains("braços"))return "Eleve os braços até onde estiver confortável. Desça lentamente.";
+        if(s.contains("lateral"))return "Dê um passo para cada lado, mantendo o tronco estável.";
+        if(s.contains("agachamento"))return "Flexione quadris e joelhos sem forçar a amplitude. Mantenha os pés firmes.";
+        if(s.contains("parede"))return "Apoie as mãos na parede, flexione os braços e empurre de volta.";
+        if(s.contains("prancha"))return "Mantenha tronco alinhado. Apoie os joelhos se precisar.";
+        return "Alongue suavemente, sem balanços ou dor.";
     }
-    private void addLog(String key,String name){JSONObject item=new JSONObject();try{item.put("date",today());item.put("name",name);item.put("id",System.currentTimeMillis());arr(key).put(item);save();}catch(Exception ignored){}}
-    private void walks(){section(content,"CAMINHADAS","Registre sua atividade. Não utiliza GPS.");
-        LinearLayout c=card();section(c,"REGISTRAR CAMINHADA","Informe o tempo após caminhar.");c.addView(button("＋ ADICIONAR CAMINHADA",true,this::walkDialog));content.addView(c,lp(-1,-2,14));
-        LinearLayout hist=card();section(hist,"HISTÓRICO",count("walks")+" caminhada(s) registrada(s)");
-        JSONArray walks=arr("walks");for(int i=walks.length()-1;i>=0;i--){JSONObject w=walks.optJSONObject(i);if(w!=null)hist.addView(text("• "+w.optString("date")+" · "+w.optInt("minutes")+" min"+(w.optDouble("km",0)>0?" · "+w.optDouble("km")+" km":""),16,WHITE,false),lp(-1,-2,10));}
-        if(walks.length()==0)hist.addView(text("Sua primeira caminhada aparecerá aqui.",15,MUTED,false));content.addView(hist);
+    private String formatSeconds(long sec){return String.format(Locale.US,"%02d:%02d",sec/60,sec%60);}
+    private void guide(){
+        String[] p=planFor(plan);String step=p[Math.min(exerciseIndex+2,p.length-1)];
+        content.addView(kicker("MISSÃO ATIVA · "+p[1].toUpperCase(Locale.ROOT)),lp(-1,-2,5));
+        section(content,guideResting?"DESCANSO":"TREINO GUIADO", "Etapa "+(exerciseIndex+1)+" de 4");
+        greenBar(content,exerciseIndex+1,4);
+        LinearLayout c=card();
+        if(guideResting){
+            c.addView(text("PAUSA PARA RESPIRAR",26,GREEN,true),lp(-1,-2,7));
+            c.addView(text("Descanse até 30 segundos e retome quando estiver pronto.",16,MUTED,false),lp(-1,-2,9));
+        }else{
+            ImageView illustration=image(pic(step),260);illustration.setBackground(bg(0xff081208,EDGE,12));c.addView(illustration);
+            c.addView(text(step.toUpperCase(Locale.ROOT),29,WHITE,true),lp(-1,-2,7));
+            c.addView(text(exerciseCue(step),16,MUTED,false),lp(-1,-2,13));
+        }
+        TextView clock=text(clockDisplay(),44,GREEN,true);clock.setGravity(Gravity.CENTER);
+        clock.setBackground(bg(0xff0b1c0a,GREEN,70));clock.setPadding(dp(7),dp(16),dp(7),dp(16));
+        timerValue=clock;c.addView(clock,lp(-1,97,12));
+        c.addView(button(clockRunning?"⏸ PAUSAR":"▶ "+(guideResting?"CONTAR DESCANSO":"INICIAR TEMPO"),true,()->{toggleClock();render();}),lp(-1,-2,9));
+        if(!guideResting){
+            c.addView(button("⏱ DESCANSAR 30s",false,()->{pauseClock();sessionElapsed+=elapsedBefore;elapsedBefore=0;countdown=true;countdownTotal=30000L;guideResting=true;clockRunning=true;runningFrom=SystemClock.elapsedRealtime();render();}),lp(-1,-2,11));
+        }
+        LinearLayout next=row();next.addView(button("‹ ANTERIOR",false,()->{if(exerciseIndex>0){finishStep();exerciseIndex--;guideResting=false;render();}}),new LinearLayout.LayoutParams(0,dp(50),1));
+        TextView advance=button(guideResting?"PULAR PAUSA ›":exerciseIndex==3?"✓ CONCLUIR":"PRÓXIMO ›",false,()->{
+            if(guideResting){pauseClock();elapsedBefore=0;countdown=false;guideResting=false;render();return;}
+            finishStep();if(exerciseIndex==3){confirmComplete(p);}else{exerciseIndex++;render();}
+        });
+        LinearLayout.LayoutParams px=new LinearLayout.LayoutParams(0,dp(50),1);px.setMargins(dp(9),0,0,0);
+        next.addView(advance,px);c.addView(next);content.addView(c,lp(-1,-2,13));
+        content.addView(button("SAIR DO TREINO",false,()->{finishStep();open("treinos");}),lp(-1,-2,9));
+        label(content,"Demonstrações ilustrativas. Não substituem orientação profissional.");
+    }
+    private void finishStep(){pauseClock();if(!guideResting)sessionElapsed+=elapsedBefore;elapsedBefore=0;clockRunning=false;countdown=false;guideResting=false;}
+    private void confirmComplete(String[] p){
+        long seconds=Math.max(0,sessionElapsed/1000);new AlertDialog.Builder(this)
+        .setTitle("Missão concluída!")
+        .setMessage(p[1]+" · "+formatSeconds(seconds)+" de atividade cronometrada. Salvar no histórico?")
+        .setNegativeButton("Voltar",null).setPositiveButton("Salvar treino",(d,w)->{
+            JSONObject record=new JSONObject();try{
+                record.put("date",today());record.put("name",p[1]);record.put("seconds",seconds);
+                record.put("id",System.currentTimeMillis());arr("workouts").put(record);save();
+            }catch(Exception ignored){}
+            clockRunning=false;elapsedBefore=0;sessionElapsed=0;open("treinos");toast("Treino registrado! Mais uma missão completa.");
+        }).show();
+    }
+    private void walks(){
+        section(content,"MINHAS CAMINHADAS","Atividades reais, sem GPS ou passos inventados.");
+        JSONArray logs=arr("walks");int weekMinutes=0;
+        Calendar c=Calendar.getInstance();c.add(Calendar.DATE,-6);
+        String minDate=new SimpleDateFormat("yyyy-MM-dd",Locale.US).format(c.getTime());
+        for(int i=0;i<logs.length();i++){JSONObject o=logs.optJSONObject(i);if(o!=null&&o.optString("date").compareTo(minDate)>=0)weekMinutes+=o.optInt("minutes");}
+        LinearLayout stat=card();stat.addView(kicker("ÚLTIMOS 7 DIAS"),lp(-1,-2,7));
+        stat.addView(text(weekMinutes+" MINUTOS",32,GREEN,true),lp(-1,-2,3));
+        stat.addView(text("Tempo registrado por você, sem estimativas automáticas.",14,MUTED,false),lp(-1,-2,13));
+        stat.addView(button("＋ REGISTRAR CAMINHADA",true,this::walkDialog));content.addView(stat,lp(-1,-2,13));
+        LinearLayout hist=card();section(hist,"MEU HISTÓRICO",logs.length()+" registro(s)");
+        if(logs.length()==0)hist.addView(text("Sua primeira caminhada aparecerá aqui.",15,MUTED,false));
+        for(int i=logs.length()-1;i>=0;i--){JSONObject o=logs.optJSONObject(i);if(o==null)continue;final int ix=i;
+            LinearLayout item=row();LinearLayout body=col();body.addView(text(o.optInt("minutes")+" min"+(o.optDouble("km",0)>0?" · "+o.optDouble("km")+" km":""),19,WHITE,true));
+            body.addView(text(dayString(o.optString("date")),13,MUTED,false));item.addView(body,new LinearLayout.LayoutParams(0,-2,1));
+            item.addView(button("×",false,()->confirmDelete("Excluir caminhada?",()->removeArrayItem("walks",ix))),lp(41,42,0));
+            hist.addView(item,lp(-1,-2,12));
+        }content.addView(hist,lp(-1,-2,9));
+        label(content,"Ao registrar uma caminhada, ela conta na sua constância semanal.");
     }
     private EditText field(String hint,int inputType){EditText e=new EditText(this);e.setTextColor(WHITE);e.setHintTextColor(MUTED);e.setHint(hint);e.setTextSize(17);e.setSingleLine(true);e.setInputType(inputType);return e;}
     private void walkDialog(){LinearLayout form=col();form.setPadding(dp(20),dp(7),dp(20),0);
@@ -201,44 +334,74 @@ public class MainActivity extends Activity {
             }catch(Exception e){toast("Confira os dados da caminhada.");}
         }).show();
     }
-    private void food(){section(content,"ALIMENTAÇÃO","Seus horários de refeição, sem excesso de informações.");
-        LinearLayout meals=card();section(meals,"REFEIÇÕES DE HOJE","Marque quando concluir.");
-        JSONArray list=arr("meals");for(int i=0;i<list.length();i++){JSONObject m=list.optJSONObject(i);if(m==null)continue;
-            LinearLayout r=row();TextView t=text(m.optString("name")+"  ·  "+m.optString("time"),16,WHITE,true);r.addView(t,new LinearLayout.LayoutParams(0,dp(54),1));
-            CheckBox checked=new CheckBox(this);checked.setButtonTintList(android.content.res.ColorStateList.valueOf(GREEN));checked.setChecked(today().equals(m.optString("doneDate")));
-            checked.setOnCheckedChangeListener((button,ok)->{try{m.put("doneDate",ok?today():"");save();}catch(Exception ignored){}});r.addView(checked);meals.addView(r);}
-        if(list.length()==0)meals.addView(text("Nenhum horário adicionado.",15,MUTED,false),lp(-1,-2,13));
-        meals.addView(button("＋ NOVA REFEIÇÃO",true,this::mealDialog));content.addView(meals,lp(-1,-2,15));
+    private void food(){
+        section(content,"ALIMENTAÇÃO","Uma rotina simples, sem dietas obrigatórias.");
+        LinearLayout meals=card();JSONArray list=arr("meals");int completed=0;
+        for(int i=0;i<list.length();i++){JSONObject m=list.optJSONObject(i);if(m!=null&&today().equals(m.optString("doneDate")))completed++;}
+        section(meals,"REFEIÇÕES DE HOJE",completed+" de "+list.length()+" marcadas");
+        for(int i=0;i<list.length();i++){JSONObject m=list.optJSONObject(i);if(m==null)continue;final int index=i;
+            LinearLayout r=row();LinearLayout desc=col();desc.addView(text(m.optString("name"),18,WHITE,true));
+            desc.addView(text(m.optString("time"),13,MUTED,false));r.addView(desc,new LinearLayout.LayoutParams(0,dp(52),1));
+            CheckBox checked=new CheckBox(this);checked.setButtonTintList(android.content.res.ColorStateList.valueOf(GREEN));
+            checked.setChecked(today().equals(m.optString("doneDate")));checked.setContentDescription("Marcar "+m.optString("name")+" como concluída");
+            checked.setOnCheckedChangeListener((btn,ok)->{try{m.put("doneDate",ok?today():"");save();}catch(Exception ignored){}});
+            r.addView(checked,lp(43,52,0));
+            r.addView(button("×",false,()->confirmDelete("Remover refeição?",()->{
+                ReminderScheduler.cancelMeal(MainActivity.this,m.optString("id"));removeArrayItem("meals",index);scheduleReminders();
+            })),lp(40,43,0));meals.addView(r,lp(-1,-2,8));
+        }
+        if(list.length()==0)meals.addView(text("Adicione horários para organizar seu dia.",15,MUTED,false),lp(-1,-2,13));
+        meals.addView(button("＋ NOVA REFEIÇÃO",true,this::mealDialog));content.addView(meals,lp(-1,-2,14));
         LinearLayout water=card();section(water,"ÁGUA","Registre quantos copos bebeu.");
-        int value=data.optInt("water_"+today(),0);water.addView(text(value+" copo(s) hoje",26,GREEN,true),lp(-1,-2,9));
-        LinearLayout buttons=row();buttons.addView(button("−",false,()->changeWater(-1)),new LinearLayout.LayoutParams(0,dp(47),1));
-        LinearLayout.LayoutParams pl=new LinearLayout.LayoutParams(0,dp(47),2);pl.setMargins(dp(8),0,0,0);buttons.addView(button("＋ REGISTRAR COPO",true,()->changeWater(1)),pl);water.addView(buttons);content.addView(water,lp(-1,-2,13));
-        content.addView(button("CONFIGURAR LEMBRETES",false,()->open("notificacoes")));
+        int value=data.optInt("water_"+today(),0);water.addView(text(value+" COPOS HOJE",27,GREEN,true),lp(-1,-2,13));
+        LinearLayout buttons=row();buttons.addView(button("− RETIRAR",false,()->changeWater(-1)),new LinearLayout.LayoutParams(0,dp(47),1));
+        LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,dp(47),1.6f);p.setMargins(dp(8),0,0,0);
+        buttons.addView(button("＋ ADICIONAR",true,()->changeWater(1)),p);water.addView(buttons);content.addView(water,lp(-1,-2,13));
+        content.addView(button("CONFIGURAR LEMBRETES ›",false,()->open("notificacoes")));
+        label(content,"O número de copos não representa uma medição automática em mililitros.");
     }
     private void changeWater(int value){try{String k="water_"+today();data.put(k,Math.max(0,Math.min(30,data.optInt(k,0)+value)));save();render();}catch(Exception ignored){}}
-    private void mealDialog(){LinearLayout form=col();form.setPadding(dp(20),dp(7),dp(20),0);
-        EditText name=field("Refeição (ex.: Almoço)",1),time=field("Hora HH:mm (ex.: 12:00)",1);
-        form.addView(name,lp(-1,-2,12));form.addView(time);
-        new AlertDialog.Builder(this).setTitle("Novo horário").setView(form).setNegativeButton("Cancelar",null).setPositiveButton("Salvar",(d,w)->{
-            String n=name.getText().toString().trim(),t=time.getText().toString().trim();
-            if(n.isEmpty()||n.length()>45||!t.matches("(?:[01][0-9]|2[0-3]):[0-5][0-9]")){toast("Informe nome e hora HH:mm.");return;}
-            try{JSONObject item=new JSONObject();item.put("name",n);item.put("time",t);item.put("id",String.valueOf(System.nanoTime()));arr("meals").put(item);save();scheduleReminders();render();}
+    private void mealDialog(){
+        LinearLayout form=col();form.setPadding(dp(20),dp(8),dp(20),0);
+        EditText name=field("Refeição (ex.: Almoço)",1);
+        TextView time=button("SELECIONAR HORÁRIO",false,()->{});
+        final String[] chosen={""};
+        time.setOnClickListener(v->{Calendar now=Calendar.getInstance();new TimePickerDialog(this,(picker,hour,minute)->{
+            chosen[0]=String.format(Locale.US,"%02d:%02d",hour,minute);time.setText("HORÁRIO · "+chosen[0]);
+        },now.get(Calendar.HOUR_OF_DAY),now.get(Calendar.MINUTE),true).show();});
+        form.addView(name,lp(-1,-2,14));form.addView(time);
+        new AlertDialog.Builder(this).setTitle("Novo horário de refeição").setView(form)
+        .setNegativeButton("Cancelar",null).setPositiveButton("Salvar",(d,w)->{
+            String n=name.getText().toString().trim();String t=chosen[0];
+            if(n.isEmpty()||n.length()>45||t.isEmpty()){toast("Informe refeição e escolha um horário.");return;}
+            try{JSONObject item=new JSONObject();item.put("name",n);item.put("time",t);
+                item.put("id",String.valueOf(System.nanoTime()));arr("meals").put(item);save();scheduleReminders();render();toast("Horário registrado.");}
             catch(Exception ignored){}
         }).show();
     }
-    private void evolution(){section(content,"MINHA EVOLUÇÃO","Acompanhe seus próprios registros.");
-        JSONArray weights=arr("weights");
-        LinearLayout chart=card();section(chart,"HISTÓRICO DE PESO",weights.length()+" registro(s)");
-        if(weights.length()>0){JSONObject latest=weights.optJSONObject(weights.length()-1);
-            chart.addView(text(String.format(Locale.forLanguageTag("pt-BR"),"%.1f kg",latest.optDouble("kg")),33,GREEN,true),lp(-1,-2,5));
-            chart.addView(new WeightChart(this,weights),lp(-1,150,10));
-        }else chart.addView(text("Adicione seu primeiro peso para ver o gráfico.",15,MUTED,false),lp(-1,-2,13));
-        chart.addView(button("＋ REGISTRAR PESO",true,this::weightDialog));content.addView(chart,lp(-1,-2,15));
-        LinearLayout badges=card();section(badges,"CONQUISTAS REAIS","Cada atividade concluída conta.");
-        badges.addView(text((count("workouts")>0?"✓":"○")+" Primeiro treino",18,WHITE,true),lp(-1,-2,10));
-        badges.addView(text((count("walks")>0?"✓":"○")+" Primeira caminhada",18,WHITE,true),lp(-1,-2,9));
-        badges.addView(text("Total: "+count("workouts")+" treinos · "+count("walks")+" caminhadas",15,MUTED,false));content.addView(badges,lp(-1,-2,12));
-        content.addView(button("VER FOTOS PRIVADAS",false,()->open("fotos")));
+    private void evolution(){
+        section(content,"MINHA EVOLUÇÃO","Conquistas reais. Seu ritmo, suas escolhas.");
+        JSONArray weights=arr("weights");LinearLayout chart=card();section(chart,"REGISTROS DE PESO",weights.length()+" registro(s)");
+        if(weights.length()>0){JSONObject last=weights.optJSONObject(weights.length()-1);
+            chart.addView(text(String.format(Locale.forLanguageTag("pt-BR"),"%.1f kg",last.optDouble("kg")),36,GREEN,true),lp(-1,-2,5));
+            if(weights.length()>1){JSONObject first=weights.optJSONObject(0);double delta=last.optDouble("kg")-first.optDouble("kg");
+                chart.addView(text(String.format(Locale.forLanguageTag("pt-BR"),"Variação: %+.1f kg desde o primeiro registro",delta),14,MUTED,false),lp(-1,-2,10));
+                chart.addView(new WeightChart(this,weights),lp(-1,170,12));}
+        }else chart.addView(text("Registre seu primeiro peso para ver a evolução.",15,MUTED,false),lp(-1,-2,13));
+        chart.addView(button("＋ REGISTRAR PESO",true,this::weightDialog));content.addView(chart,lp(-1,-2,13));
+        LinearLayout records=card();section(records,"HISTÓRICO","Você pode remover um registro incorreto.");
+        if(weights.length()==0)records.addView(text("Nenhum registro ainda.",14,MUTED,false));
+        for(int i=weights.length()-1;i>=0;i--){JSONObject o=weights.optJSONObject(i);if(o==null)continue;final int idx=i;
+            LinearLayout item=row();LinearLayout textBox=col();textBox.addView(text(String.format(Locale.forLanguageTag("pt-BR"),"%.1f kg",o.optDouble("kg")),18,WHITE,true));
+            textBox.addView(text(dayString(o.optString("date")),13,MUTED,false));item.addView(textBox,new LinearLayout.LayoutParams(0,-2,1));
+            item.addView(button("×",false,()->confirmDelete("Excluir registro de peso?",()->removeArrayItem("weights",idx))),lp(41,42,0));records.addView(item,lp(-1,-2,9));
+        }content.addView(records,lp(-1,-2,13));
+        LinearLayout rewards=card();section(rewards,"MINHAS CONQUISTAS","Baseadas nas atividades registradas.");
+        rewards.addView(text((count("workouts")>0?"★ ":"○ ")+"Primeiro treino",18,count("workouts")>0?GREEN:MUTED,true),lp(-1,-2,8));
+        rewards.addView(text((count("walks")>0?"★ ":"○ ")+"Primeira caminhada",18,count("walks")>0?GREEN:MUTED,true),lp(-1,-2,8));
+        rewards.addView(text((activityCountThisWeek()>=3?"★ ":"○ ")+"3 dias ativos na semana",18,activityCountThisWeek()>=3?GREEN:MUTED,true),lp(-1,-2,6));
+        greenBar(rewards,activityCountThisWeek(),7);content.addView(rewards,lp(-1,-2,13));
+        content.addView(button("VER FOTOS PRIVADAS ›",false,()->open("fotos")));
     }
     private void weightDialog(){EditText kg=field("Peso em kg (ex.: 75.4)",8194);
         new AlertDialog.Builder(this).setTitle("Registrar peso").setView(kg).setNegativeButton("Cancelar",null).setPositiveButton("Salvar",(d,w)->{
@@ -254,11 +417,19 @@ public class MainActivity extends Activity {
         JSONArray photos=arr("photos");if(photos.length()==0)content.addView(text("Sua galeria começa aqui.",15,MUTED,false));
         for(int i=photos.length()-1;i>=0;i--){JSONObject pic=photos.optJSONObject(i);if(pic==null)continue;
             File f=new File(getFilesDir(),pic.optString("file"));if(!f.isFile())continue;
-            LinearLayout tile=card();ImageView image=new ImageView(this);image.setScaleType(ImageView.ScaleType.CENTER_CROP);image.setImageBitmap(BitmapFactory.decodeFile(f.getAbsolutePath()));
-            tile.addView(image,lp(-1,240,9));tile.addView(text(pic.optString("date"),15,MUTED,false));content.addView(tile,lp(-1,-2,14));}
+            LinearLayout tile=card();ImageView image=new ImageView(this);image.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            BitmapFactory.Options bounds=new BitmapFactory.Options();bounds.inJustDecodeBounds=true;BitmapFactory.decodeFile(f.getAbsolutePath(),bounds);
+            BitmapFactory.Options sample=new BitmapFactory.Options();sample.inSampleSize=1;int size=Math.max(1,Math.max(bounds.outWidth,bounds.outHeight));
+            while(size>1400){sample.inSampleSize*=2;size/=2;}sample.inSampleSize=Math.max(1,sample.inSampleSize);
+            image.setImageBitmap(BitmapFactory.decodeFile(f.getAbsolutePath(),sample));
+            tile.addView(image,lp(-1,230,9));tile.addView(text(pic.optString("date"),15,MUTED,false),lp(-1,-2,8));
+            final int index=i;tile.addView(button("EXCLUIR FOTO",false,()->confirmDelete("Excluir foto privada?",()->{
+                new File(getFilesDir(),pic.optString("file")).delete();removeArrayItem("photos",index);
+            })));content.addView(tile,lp(-1,-2,14));}
         label(content,"Armazenamento privado do aplicativo. Fotos não são sincronizadas.");
     }
     @Override protected void onActivityResult(int req,int res,Intent dataIntent){super.onActivityResult(req,res,dataIntent);
+        if(req==EXPORT_JSON){if(res==RESULT_OK)writeExport(dataIntent);return;}
         if(req!=701||res!=RESULT_OK||dataIntent==null||dataIntent.getData()==null)return;
         String filename="evolufit_"+System.currentTimeMillis()+".img";File f=new File(getFilesDir(),filename);
         try(InputStream in=getContentResolver().openInputStream(dataIntent.getData());FileOutputStream out=new FileOutputStream(f)){
@@ -273,7 +444,7 @@ public class MainActivity extends Activity {
     private void pauseClock(){if(clockRunning){elapsedBefore=currentElapsed();clockRunning=false;}}
     private void timer(){section(content,"RELÓGIO E CRONÔMETRO","Seu tempo de treino e descanso.");
         LinearLayout c=card();TextView now=text("HORA ATUAL   "+new SimpleDateFormat("HH:mm",Locale.getDefault()).format(new Date()),17,MUTED,true);
-        now.setGravity(Gravity.CENTER);c.addView(now,lp(-1,-2,12));
+        now.setGravity(Gravity.CENTER);liveTime=now;c.addView(now,lp(-1,-2,12));
         TextView mode=text(countdown?"TEMPORIZADOR":"CRONÔMETRO",15,GREEN,true);mode.setGravity(Gravity.CENTER);c.addView(mode,lp(-1,-2,12));
         TextView display=text(clockDisplay(),42,WHITE,true);display.setGravity(Gravity.CENTER);display.setBackground(bg(0xff0e230b,GREEN,85));display.setPadding(dp(4),dp(23),dp(4),dp(23));timerValue=display;c.addView(display,lp(-1,-2,19));
         c.addView(button(clockRunning?"⏸ PAUSAR":"▶ INICIAR",true,()->{toggleClock();render();}),lp(-1,-2,9));
@@ -284,20 +455,36 @@ public class MainActivity extends Activity {
         for(int value:new int[]{30,60,120,300,600}){int val=value;quick.addView(button(value<60?value+" SEGUNDOS":(value/60)+" MINUTO(S)",false,()->{pauseClock();countdown=true;countdownTotal=val*1000L;elapsedBefore=0;render();}),lp(-1,-2,8));}
         content.addView(quick);label(content,"O cronômetro usa o relógio do Android. Ele não depende do navegador.");
     }
-    private void profile(){section(content,"MEU PERFIL","Seu espaço no EvoluFit nativo.");
-        LinearLayout c=card();section(c,"SEUS DADOS","Tudo armazenado somente no aplicativo.");
-        c.addView(text("Nome: "+data.optString("name","não informado"),17,WHITE,false),lp(-1,-2,14));
-        c.addView(button("EDITAR NOME",true,()->{
+    private void exportRecords(){
+        Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT);intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/json");intent.putExtra(Intent.EXTRA_TITLE,"evolufit-dados-"+today()+".json");
+        startActivityForResult(intent,EXPORT_JSON);
+    }
+    private void writeExport(Intent intent){
+        if(intent==null||intent.getData()==null)return;
+        try(java.io.OutputStream out=getContentResolver().openOutputStream(intent.getData())){
+            if(out==null)throw new Exception("sem arquivo");out.write(data.toString(2).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            toast("Backup dos registros salvo. Fotos não incluídas.");
+        }catch(Exception ignored){toast("Não foi possível exportar os dados.");}
+    }
+    private void profile(){
+        section(content,"MEU PERFIL","Personalize o aplicativo do seu jeito.");
+        LinearLayout user=card();user.addView(kicker("SEU ESPAÇO"),lp(-1,-2,7));
+        user.addView(text(data.optString("name","").isEmpty()?"ATLETA EVOLUFIT":data.optString("name").toUpperCase(Locale.ROOT),29,WHITE,true),lp(-1,-2,12));
+        user.addView(button("EDITAR NOME",true,()->{
             EditText name=field("Nome ou apelido",1);name.setText(data.optString("name",""));
-            new AlertDialog.Builder(this).setTitle("Meu nome").setView(name).setNegativeButton("Cancelar",null).setPositiveButton("Salvar",(d,w)->{
-                try{data.put("name",name.getText().toString().trim().substring(0,Math.min(name.length(),60)));save();render();}catch(Exception ignored){}
-            }).show();
-        }));content.addView(c,lp(-1,-2,14));
+            new AlertDialog.Builder(this).setTitle("Como quer ser chamado?").setView(name).setNegativeButton("Cancelar",null)
+            .setPositiveButton("Salvar",(d,w)->{try{String n=name.getText().toString().trim();data.put("name",n.substring(0,Math.min(n.length(),60)));save();render();}catch(Exception ignored){}}).show();
+        }));content.addView(user,lp(-1,-2,13));
         section(content,"MINHAS FERRAMENTAS",null);
         tiles(new String[][]{{"fotos","FOTOS"},{"caminhadas","CAMINHADAS"},{"alimentacao","ALIMENTAÇÃO"},{"notificacoes","LEMBRETES"}});
-        LinearLayout about=card();section(about,"SOBRE ESTA VERSÃO","EvoluFit Android · 0.1.0 alpha");
-        about.addView(text("Aplicativo Android nativo. Sem WebView, sem conta e sem sincronização nesta versão de teste. Fotos e registros ficam no celular.",15,MUTED,false));
-        content.addView(about);
+        LinearLayout privacy=card();section(privacy,"PRIVACIDADE E DADOS","Seus registros ficam somente neste aparelho.");
+        privacy.addView(button("⬇ EXPORTAR REGISTROS",true,this::exportRecords),lp(-1,-2,13));
+        privacy.addView(text("Exporta um arquivo JSON com treinos, pesos, caminhadas, água e refeições. Fotos não estão incluídas.",14,MUTED,false));
+        content.addView(privacy,lp(-1,-2,13));
+        LinearLayout version=card();version.addView(kicker("EVOLUFIT ANDROID NATIVE BETA · 0.2"),lp(-1,-2,7));
+        version.addView(text("Sem WebView, sem anúncios, sem coleta de dados e sem sincronização nesta versão de testes.",14,MUTED,false));
+        content.addView(version);
     }
     private void notifications(){section(content,"NOTIFICAÇÕES","Lembretes nativos das suas refeições.");
         LinearLayout c=card();section(c,"AVISOS DO ANDROID","Funcionam mesmo com o aplicativo fechado, sujeitos ao agendamento do sistema.");
@@ -314,21 +501,7 @@ public class MainActivity extends Activity {
     @Override public void onRequestPermissionsResult(int req,String[] permissions,int[] result){super.onRequestPermissionsResult(req,permissions,result);
         if(req==900&&result.length>0&&result[0]==PackageManager.PERMISSION_GRANTED){try{data.put("notify",true);save();scheduleReminders();render();}catch(Exception ignored){}}
     }
-    private void scheduleReminders(){
-        AlarmManager alarm=(AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        JSONArray meals=arr("meals");
-        for(int i=0;i<meals.length();i++){
-            JSONObject m=meals.optJSONObject(i);if(m==null)continue;
-            try{
-                String[] p=m.getString("time").split(":");Calendar date=Calendar.getInstance();date.set(Calendar.HOUR_OF_DAY,Integer.parseInt(p[0]));date.set(Calendar.MINUTE,Integer.parseInt(p[1]));date.set(Calendar.SECOND,0);
-                if(date.getTimeInMillis()<=System.currentTimeMillis())date.add(Calendar.DATE,1);
-                Intent intent=new Intent(this,ReminderReceiver.class);intent.setAction("br.com.evolufit.nativeapp.REMIND_MEAL");intent.putExtra("mealId",m.getString("id"));
-                PendingIntent pi=PendingIntent.getBroadcast(this,m.optString("id").hashCode(),intent,PendingIntent.FLAG_IMMUTABLE|PendingIntent.FLAG_UPDATE_CURRENT);
-                if(data.optBoolean("notify",false))alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP,date.getTimeInMillis(),AlarmManager.INTERVAL_DAY,pi);
-                else alarm.cancel(pi);
-            }catch(Exception ignored){}
-        }
-    }
+    private void scheduleReminders(){ReminderScheduler.schedule(this);}
     /** Compact native vector pictograms in EvoluFit's green/white language. */
     private final class IconMark extends View {
         private final String type;private final Paint p=new Paint(3);private final int color;

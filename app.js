@@ -82,7 +82,7 @@ function nav(){
  $('#sidebar').innerHTML='<a href="#inicio" class="brand"><img src="'+mascot+'" alt="Gatinho EvoluFit"><span>Evolu<em>Fit</em></span></a>'+
  all+'<div class="sidebarfoot">💚 Seu treino, sua rotina, sua evolução!<br><small>Um passo de cada vez.</small></div>';
  $('#topbar').innerHTML=
- '<div class="ef-user-header"><button class="menu-trigger" type="button" data-action="toggle-menu" aria-label="Abrir menu">'+uiIcon("menu")+'</button>'+
+ '<div class="ef-user-header"><button class="menu-trigger" type="button" data-action="toggle-menu" aria-expanded="false" aria-label="Abrir menu">'+uiIcon("menu")+'</button>'+
  '<a class="mini-logo" href="#inicio">Evolu<em>Fit</em></a>'+
  '<div class="top-welcome"><strong>Olá, '+name+'! 👋</strong><small>Seu progresso, no seu ritmo.</small></div></div>'+
  '<div class="top-actions"><a class="quick-bell" href="#notificacoes" aria-label="Central de lembretes" title="Central de lembretes">'+uiIcon("bell")+'</a>'+
@@ -320,8 +320,8 @@ function downloadJson(){
 document.addEventListener("click",async e=>{
  const b=e.target.closest("[data-action]");if(!b)return;
  const act=b.dataset.action,idv=b.dataset.id; if(act==="meal-check")return;
- if(act==="toggle-menu"){document.body.classList.toggle("menu-open");return;}
- if(act==="close-menu"){document.body.classList.remove("menu-open");return;}
+ if(act==="toggle-menu"){const opened=document.body.classList.toggle("menu-open");b.setAttribute("aria-expanded",String(opened));document.querySelector("#menu-overlay")?.setAttribute("aria-hidden",String(!opened));return;}
+ if(act==="close-menu"){document.body.classList.remove("menu-open");document.querySelector("#menu-overlay")?.setAttribute("aria-hidden","true");return;}
  if(act==="notify-toggle"){
   if(data.notifications){data.notifications=false;save();render();toast("Lembretes desativados.");return;}
   if(!("Notification" in window)){toast("Seu navegador não oferece esse recurso.");return;}

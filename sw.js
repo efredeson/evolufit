@@ -1,5 +1,5 @@
-const CACHE="evolufit-root-v5-hd";
-const ASSETS=["./","./index.html","./styles.css","./app.js","./manifest.webmanifest","./assets/evolufit-gatinho-hd.webp","./assets/evolufit-marca-hd.webp"];
+const CACHE="evolufit-root-v6-exercise-images";
+const ASSETS=["./","./index.html","./styles.css","./app.js","./manifest.webmanifest","./assets/evolufit-gatinho-hd.webp","./assets/evolufit-marca-hd.webp","./assets/exercicios/marcha.svg","./assets/exercicios/cadeira.svg","./assets/exercicios/bracos.svg","./assets/exercicios/lateral.svg","./assets/exercicios/agachamento.svg","./assets/exercicios/parede.svg","./assets/exercicios/panturrilha.svg","./assets/exercicios/prancha.svg","./assets/exercicios/ombros.svg","./assets/exercicios/pescoco.svg","./assets/exercicios/quadril.svg","./assets/exercicios/alongamento.svg","./assets/exercicios/polichinelo.svg","./assets/exercicios/passada.svg","./assets/exercicios/respiracao.svg"];
 self.addEventListener("install",e=>{
  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });

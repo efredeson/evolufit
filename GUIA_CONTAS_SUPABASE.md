@@ -2,6 +2,17 @@
 
 > **Não está ativo no site público.** O recurso vive na branch `feature/contas-supabase` até que exista um projeto Supabase separado, validado.
 
+## Situação do banco (17/11/2026)
+- ✅ Novo projeto **EvoluFit** criado na região `sa-east-1`, ID `qovpsvjfeermpjtjwscb`.
+- ✅ Migração `evolufit_init_private_user_data` aplicada com sucesso.
+- ✅ Tabelas `ef_user_state` e `ef_photos` com RLS, permissões restritas e oito políticas de propriedade.
+- ✅ Bucket `evolufit-photos` privado, aceita JPG/PNG/WebP até 8 MB.
+- ✅ Chave **publicável** configurada em `config.js` apenas na branch de desenvolvimento.
+- ✅ Supabase Security Advisor sem alertas no momento da verificação.
+- ⏳ Configurar **Authentication → URL Configuration**: Site URL e Redirect URL `https://efredeson.github.io/evolufit/`.
+- ⏳ Testar login, confirmação, recuperação de senha, gravação/leitura e isolamento com duas contas antes de mesclar esta branch.
+- ⛔ **Não mesclar na main antes dos testes de autenticação e isolamento.** A main continua na versão v0.1.
+
 ## Projetos separados
 NÃO reutilize o projeto `GABS-RIFAS`. Criar um projeto Supabase próprio chamado `EvoluFit`, na organização e no plano escolhidos pelo proprietário.
 

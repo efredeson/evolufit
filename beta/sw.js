@@ -1,4 +1,4 @@
-const CACHE="evolufit-beta-v12-mission-ui";
+const CACHE="evolufit-beta-v13-approved-ui";
 const ASSETS=["./","./index.html","./styles.css","./cloud.css","../theme-neon.css","./config.js","./cloud.js","./app.js","./manifest.webmanifest","../assets/evolufit-gatinho-hd.webp","../assets/evolufit-marca-hd.webp","../assets/exercicios/marcha-foto.webp","../assets/exercicios/cadeira-foto.webp","../assets/exercicios/bracos-foto.webp","../assets/exercicios/lateral-foto.webp","../assets/exercicios/agachamento-foto.webp","../assets/exercicios/parede-foto.webp","../assets/exercicios/prancha-foto.webp","../assets/exercicios/alongamento-foto.webp","../ef-icons.js","../assets/evolufit-symbol-amoled.svg","../mission-ui.js","../mission-ui.css"];
 self.addEventListener("install",e=>{
  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));

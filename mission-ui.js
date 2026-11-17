@@ -180,7 +180,7 @@
  }
  function showGuide(plan){
   if(!plan)return;
-  state.guided={plan,idx:0,accumulated:0,playing:false,startAt:0};
+  state.guided={plan,idx:0,accumulated:0,playing:false,startAt:0,totalMs:0};
   renderGuide();
  }
  function renderGuide(){
@@ -213,8 +213,8 @@
   else{g.playing=true;g.startAt=Date.now();renderGuide();}
  }
  function stepGuide(delta){
-  const g=state.guided;if(!g)return;pauseGuide();g.idx=Math.max(0,Math.min(g.plan.steps.length-1,g.idx+delta));
-  g.accumulated=0;renderGuide();
+  const g=state.guided;if(!g)return;pauseGuide();g.totalMs+=g.accumulated;
+  g.idx=Math.max(0,Math.min(g.plan.steps.length-1,g.idx+delta));g.accumulated=0;renderGuide();
  }
  function exitGuide(){pauseGuide();state.guided=null;closeModal()}
  function completeGuide(){
@@ -222,7 +222,8 @@
   state.starting=true;
   try {
    pauseGuide();
-   data.workouts.push({id:id(),date:today(),title:g.plan.title,minutes:g.plan.time});
+   const realMinutes=Math.round((g.totalMs+g.accumulated)/6000)/10;
+   data.workouts.push({id:id(),date:today(),title:g.plan.title,minutes:realMinutes});
    save();exitGuide();render();toast("Missão concluída! Seu treino foi registrado. 💚");
   }finally{state.starting=false}
  }

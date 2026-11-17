@@ -20,3 +20,13 @@
 .exercise-modal .footnote{font-size:12px;line-height:1.55}
 .exercise-step summary:focus-visible{outline:3px solid #72cf77;outline-offset:-3px}
 @media(max-width:420px){.exercise-step summary{gap:9px;padding:8px}.exercise-step summary>img{width:84px;height:56px}.exercise-step-title strong{font-size:12px}.exercise-step-title small{font-size:10px}.training .plan-preview{height:118px}}
+
+/* EvoluFit — mídia realista: a interface continua compacta e abre o detalhe sob demanda. */
+.training .plan-preview{height:165px;object-fit:cover;object-position:center 60%;background:#08140c}
+.exercise-step summary>img{width:112px;height:78px;object-fit:cover;object-position:center 60%}
+.exercise-extra img{max-height:440px;max-width:360px;width:100%;object-fit:contain;margin:12px auto;background:#0b1410}
+@media(max-width:420px){
+ .training .plan-preview{height:145px}
+ .exercise-step summary>img{width:92px;height:66px}
+ .exercise-extra img{max-height:410px}
+}

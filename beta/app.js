@@ -55,13 +55,48 @@ function title(t,sub,label="SUA JORNADA",right=""){
 function stat(t,v,n,em){return '<article class="card animated"><div class="cardhead"><span class="statlabel">'+t+'</span><span class="circle">'+em+'</span></div><div class="statnum">'+v+'</div><div class="hint">'+n+'</div></article>';}
 function empty(t,sub,em="🌿"){return '<div class="empty"><div class="em">'+em+'</div><b>'+t+'</b><small>'+sub+'</small></div>';}
 function action(name,label,cls="btn",extra=""){return '<button class="'+cls+'" data-action="'+name+'" '+extra+'>'+label+'</button>';}
+
+const SITE_ASSET_BASE = location.pathname.includes("/beta/") ? "../" : "";
+const UI_ICONS = {
+ inicio:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/>',
+ treinos:'<path d="M3 9v6M7 6v12M17 6v12M21 9v6M7 12h10"/>',
+ caminhadas:'<circle cx="13" cy="4.5" r="2"/><path d="m7 21 3-7 2-3m-5 0 5-3 4 3 3 1M12 11l-1 5 4 5"/>',
+ alimentacao:'<path d="M5 3v8M8 3v8M11 3v8M5 8h6M8 11v10M18 3v18M18 3c-4 3-5 9 0 11"/>',
+ evolucao:'<path d="M4 20V12h3v8M11 20V8h3v12M18 20V4h3v16"/>',
+ fotos:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.6"/><path d="m4 18 5-5 4 3 3-4 5 6"/>',
+ cronometro:'<circle cx="12" cy="13" r="8"/><path d="M12 13V8m0 5 3 2M9 2h6M19 5l2 2"/>',
+ ajustes:'<circle cx="12" cy="8" r="3"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>',
+ menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+ bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 9h18c0-1-3-2-3-9ZM10 21h4"/>',
+ calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v5M17 3v5M3 11h18"/>',
+ check:'<path d="m4 12 5 5L20 6"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+};
+function uiIcon(key,size=22){
+  return '<svg class="ui-icon" xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(UI_ICONS[key]||UI_ICONS.inicio)+'</svg>';
+}
+
 function nav(){
- const all= NAV.map((n,i)=>(i===5?'<div class="navtitle">MINHA JORNADA</div>':i===0?'<div class="navtitle">MENU PRINCIPAL</div>':"")+'<a href="#'+n[0]+'" class="navlink '+(view===n[0]?"active":"")+'"><span class="navemoji">'+n[2]+'</span>'+n[1]+'</a>').join("");
- $("#sidebar").innerHTML='<a href="#inicio" class="brand"><img src="../assets/evolufit-gatinho-hd.webp?v=5" onerror="this.style.display=\'none\'" alt="Gatinho EvoluFit"><span>Evolu<em>Fit</em></span></a>'+all+'<div class="sidebarfoot">💚 Um dia de cada vez. Pequenos hábitos, grandes conquistas.<br><br><small>'+(window.EvoluCloud?.active?'EvoluFit v0.2 • Nuvem privada':'Protótipo v0.1 • Dados locais')+'</small></div>';
- $("#topbar").innerHTML='<strong>EvoluFit <span> / '+es(NAV.find(n=>n[0]===view)?.[1]||"Início")+'</span></strong><a class="avatar" href="#ajustes" aria-label="Meu perfil">'+es((data.profile.name||"E")[0].toUpperCase())+'</a>';
- $("#bottomnav").innerHTML=[...NAV.slice(0,5),NAV[7]].map(n=>'<a href="#'+n[0]+'" class="'+(view===n[0]?"active":"")+'"><b>'+n[2]+'</b><span>'+n[1]+'</span></a>').join("");
+ const all = NAV.map((n,i)=>(i===5?'<div class="navtitle">MINHA JORNADA</div>':i===0?'<div class="navtitle">MENU PRINCIPAL</div>':'')+
+ '<a href="#'+n[0]+'" class="navlink '+(view===n[0]?'active':'')+'">'+
+ '<span class="navemoji">'+uiIcon(n[0])+'</span>'+n[1]+'</a>').join('');
+ const name=es((data.profile?.name||'').trim().split(' ')[0]||'você');
+ const mascot=SITE_ASSET_BASE+'assets/evolufit-gatinho-hd.webp?v=5';
+ $('#sidebar').innerHTML='<a href="#inicio" class="brand"><img src="'+mascot+'" alt="Gatinho EvoluFit"><span>Evolu<em>Fit</em></span></a>'+
+ all+'<div class="sidebarfoot">💚 Seu treino, sua rotina, sua evolução!<br><small>Um passo de cada vez.</small></div>';
+ $('#topbar').innerHTML=
+ '<div class="ef-user-header"><button class="menu-trigger" type="button" data-action="toggle-menu" aria-label="Abrir menu">'+uiIcon("menu")+'</button>'+
+ '<a class="mini-logo" href="#inicio">Evolu<em>Fit</em></a>'+
+ '<div class="top-welcome"><strong>Olá, '+name+'! 👋</strong><small>Seu progresso, no seu ritmo.</small></div></div>'+
+ '<div class="top-actions"><a class="quick-bell" href="#alimentacao" aria-label="Lembretes das refeições" title="Lembretes das refeições">'+uiIcon("bell")+'</a>'+
+ '<a class="avatar" href="#ajustes" aria-label="Meu perfil">'+es((data.profile?.name||"E")[0].toUpperCase())+'</a></div>';
+ $('#bottomnav').innerHTML=[NAV[0],NAV[1],NAV[4],NAV[7]].map(n=>
+ '<a href="#'+n[0]+'" class="'+(view===n[0]?'active':'')+'"><b>'+uiIcon(n[0])+'</b><span>'+(n[0]==='ajustes'?'Perfil':n[1])+'</span></a>'
+ ).join('');
+ document.querySelectorAll('.ef-menu-backdrop').forEach(el=>el.setAttribute('aria-hidden',String(!document.body.classList.contains('menu-open'))));
  window.EvoluCloud?.decorateNav();
 }
+
 function render(){
  if(!NAV.find(n=>n[0]===view))view="inicio";
  nav();
@@ -71,15 +106,42 @@ function render(){
  if(view==="cronometro")drawClock();
 }
 function home(){
- const name=es(data.profile.name.trim().split(" ")[0]||"você");
- const minutes=sameWeek(data.walks).reduce((n,x)=>n+Number(x.minutes),0);
- const done=data.mealDone[today()]||[];
- let hero='<section class="hero"><div><small>🐱 EVOLUFIT · SEU ESPAÇO</small><h2>Seu ritmo.<br>Sua evolução.</h2><p>Oi, '+name+'! Que tal cuidar de você com pequenas conquistas hoje?</p>'+action("goto","Explorar treinos →","btn", 'data-target="treinos"')+'</div><img src="../assets/evolufit-gatinho-hd.webp?v=5" alt="Gatinho mascote EvoluFit" onerror="this.style.display=\'none\'"></section>';
- let stats='<div class="grid cards">'+stat("Treinos na semana",sameWeek(data.workouts).length,"últimos 7 dias","🏋️")+stat("Caminhadas",minutes+" min","últimos 7 dias","🚶")+stat("Peso registrado",lastWeight()?money(lastWeight()):"—","último registro","⚖️")+stat("Refeições",done.length+"/"+data.meals.length,"registradas hoje","🥗")+'</div>';
- let rows='<div class="listitem"><div class="circle">🏋️</div><div class="grow"><strong>Treino em casa</strong><small>Movimente-se sem precisar de academia.</small></div>'+action("goto","Abrir","btn secondary small",'data-target="treinos"')+'</div><div class="listitem"><div class="circle">🚶</div><div class="grow"><strong>Caminhada</strong><small>Registre seus minutos e distâncias.</small></div>'+action("goto","Abrir","btn secondary small",'data-target="caminhadas"')+'</div><div class="listitem"><div class="circle">🥗</div><div class="grow"><strong>Rotina alimentar</strong><small>Organize seus horários.</small></div>'+action("goto","Abrir","btn secondary small",'data-target="alimentacao"')+'</div>';
- let water=data.water[today()]||0;
- let drops=Array.from({length:8},(_,i)=>'<span class="'+(i<water?"filled":"")+'">💧</span>').join("");
- return hero+stats+'<div class="grid two"><section class="card"><div class="cardhead"><h2>Seu dia no EvoluFit</h2><span class="pill">Comece hoje</span></div>'+rows+'</section><section class="card"><div class="cardhead"><h2>Hidratação de hoje</h2><span class="pill">'+water+' copos</span></div><p class="sub">Registre a água que você tomou.</p><div class="waterdots">'+drops+'</div><div style="display:flex;gap:8px;flex-wrap:wrap">'+action("water-add","＋ Adicionar copo")+action("water-remove","↶ Desfazer","btn secondary")+'</div><p class="footnote">Contagem de hábito, não uma recomendação de quantidade.</p></section></div>';
+ const name=es((data.profile?.name||'').trim().split(' ')[0]||'você');
+ const minutes=sameWeek(data.walks).reduce((sum,w)=>sum+Number(w.minutes||0),0);
+ const completed=sameWeek(data.workouts).length;
+ const done=(data.mealDone[today()]||[]).length;
+ const current=lastWeight();
+ const target=Number(data.profile?.goal)||null;
+ const completedPct=target&&current ? Math.max(0,Math.min(100,Math.round((1-Math.abs(current-target)/Math.max(current,target))*100))) : 0;
+ const date=new Intl.DateTimeFormat('pt-BR',{weekday:'short',day:'2-digit',month:'short'}).format(new Date());
+ const mascot=SITE_ASSET_BASE+'assets/evolufit-gatinho-hd.webp?v=5';
+ const quick=[
+ ['treinos','Treino'],['alimentacao','Alimentação'],['caminhadas','Caminhada'],['cronometro','Cronômetro']
+ ].map(([k,label])=>'<a href="#'+k+'" class="ef-action">'+uiIcon(k,30)+'<span>'+label+'</span></a>').join('');
+ const hero='<section class="hero ef-newhero"><div><small>💚 EVOLUFIT · SUA JORNADA</small>'+
+ '<h2>Seu treino, sua rotina,<br><em>sua evolução!</em></h2>'+
+ '<p>Pequenos passos todos os dias. Vamos começar?</p>'+
+ action("goto","Começar treino ▶","btn",'data-target="treinos"')+
+ '</div><img src="'+mascot+'" alt="Gatinho esportista EvoluFit"></section>';
+ const weekly='<section class="card"><div class="cardhead"><h2>Minha semana</h2><span class="pill">Últimos 7 dias</span></div>'+
+ '<div class="ef-inline-stat"><span>Treinos realizados</span><strong>'+completed+'</strong></div>'+
+ '<div class="ef-inline-stat"><span>Tempo de caminhada</span><strong>'+minutes+' min</strong></div>'+
+ '<div class="ef-inline-stat"><span>Refeições registradas hoje</span><strong>'+done+' / '+data.meals.length+'</strong></div>'+
+ '<p class="ef-empty-note">Acompanhe seu ritmo, sem metas obrigatórias.</p></section>';
+ const progress='<section class="card"><div class="cardhead"><h2>Minha evolução</h2><a href="#evolucao" class="ef-chip">Ver histórico ›</a></div>'+
+ '<div class="ef-progress-value">'+(current?money(current):'—')+'</div>'+
+ '<div class="ef-subtle">'+(current?'Último peso registrado':'Registre seu peso para acompanhar sua evolução.')+'</div>'+
+ (target&&current?'<div class="ef-inline-stat"><span>Meta informada</span><strong>'+money(target)+'</strong></div>'+
+ '<div class="ef-progressbar"><span style="width:'+completedPct+'%"></span></div>':'')+
+ '<div class="ef-mini-nav" style="margin-top:15px"><a href="#evolucao">Registrar peso →</a></div></section>';
+ const measures='<div class="grid cards ef-today-stats">'+
+ stat('Treinos',completed,'últimos 7 dias','🏋️')+
+ stat('Caminhadas',minutes+' min','últimos 7 dias','🚶')+
+ stat('Peso atual',current?money(current):'—','último registro','⚖️')+
+ stat('Refeições',done+'/'+data.meals.length,'hoje','🥗')+'</div>';
+ return hero+'<div class="ef-section-top"><h2>'+uiIcon("calendar")+' Meu dia</h2><span class="ef-date">'+es(date)+'</span></div>'+
+ '<div class="ef-actions">'+quick+'</div>'+
+ measures+'<div class="ef-summary-grid">'+weekly+progress+'</div>';
 }
 
 const EXERCISE_IMAGE_ROOT = location.pathname.includes("/beta/") ? "../assets/exercicios/" : "assets/exercicios/";
@@ -156,8 +218,20 @@ function photos(){
  '<section class="card" style="margin-top:20px"><div class="cardhead"><h2>Minha galeria</h2><span class="pill">'+(cloud?'Conta privada':'Neste dispositivo')+'</span></div><div id="photo-list">'+empty("Carregando fotos","Seus registros aparecerão aqui.","📸")+'</div></section>';
 }
 function timer(){
- return title("Cronômetro","Use nos exercícios, descanso ou caminhada.","SEU TEMPO")+'<section class="card" style="max-width:700px;margin:auto;text-align:center"><div class="pill">⏱️ '+(chronoMode==="desc"?"Contagem regressiva":"Cronômetro crescente")+'</div><div id="clock" class="clock">05:00</div><div class="timerbuttons">'+action("timer-toggle",running?"⏸ Pausar":"▶ Iniciar")+action("timer-reset","↺ Reiniciar","btn secondary")+action("timer-mode","↔ Trocar modo","btn secondary")+'</div><div class="timerbuttons" style="margin-top:18px">'+[30,60,120,300,600].map(s=>action("timer-preset",s>=60?s/60+" min":s+" s","btn secondary small",'data-seconds="'+s+'"')).join("")+'</div><p class="footnote">O timer funciona enquanto a página permanece ativa. O sistema pode suspender a contagem no segundo plano.</p></section>';
+ const currentTime=new Date().toLocaleTimeString('pt-BR',{hour12:false});
+ return title("Relógio e cronômetro","Conte o tempo dos treinos e intervalos.","SEU TEMPO")+
+ '<section class="card ef-timer-card" style="max-width:760px;margin:auto;text-align:center">'+
+ '<div class="ef-live-clock">'+uiIcon("clock")+' Hora atual <strong id="wall-clock">'+currentTime+'</strong></div>'+
+ '<div class="pill">⏱️ '+(chronoMode==="desc"?"Temporizador":"Cronômetro")+'</div>'+
+ '<div id="clock" class="clock">00:00:00</div><div class="timerbuttons">'+
+ action("timer-toggle",running?"⏸ Pausar":"▶ Iniciar")+
+ action("timer-reset","↺ Reiniciar","btn secondary")+
+ action("timer-mode","↔ Trocar modo","btn secondary")+'</div>'+
+ '<div class="timerbuttons" style="margin-top:18px">'+
+ [30,60,120,300,600].map(s=>action("timer-preset",s>=60?s/60+" min":s+" s","btn secondary small",'data-seconds="'+s+'"')).join("")+'</div>'+
+ '<p class="footnote">O cronômetro funciona enquanto a página estiver ativa. O celular pode suspender a contagem quando o aplicativo está em segundo plano.</p></section>';
 }
+
 function settings(){
  const cloud=!!window.EvoluCloud?.active;
  return title("Configurações","Personalize seu perfil e cuide dos seus registros.","MEU EVOLUFIT")+'<div class="grid two"><section class="card"><h2>Meu perfil</h2><form data-form="profile" class="formgrid"><div class="field full"><label>Nome ou apelido</label><input name="name" maxlength="60" value="'+es(data.profile.name)+'"></div><div class="field"><label>Altura (cm)</label><input type="number" name="height" min="80" max="240" value="'+es(data.profile.height)+'" placeholder="Ex: 170"></div><div class="field"><label>Peso-meta opcional (kg)</label><input type="number" name="goal" min="10" max="500" step="0.1" value="'+es(data.profile.goal)+'" placeholder="Ex: 70"></div><div class="field full"><button class="btn">Salvar perfil</button></div></form><p class="footnote">Metas pessoais podem ser de manutenção ou evolução de hábitos; emagrecer não é obrigatório.</p></section><section class="card"><h2>Privacidade & dados</h2><p>'+(cloud?'Registros e fotos sincronizados com sua conta privada no Supabase. Não compartilhe sua senha. Alterações simultâneas em vários dispositivos podem sobrescrever registros.':'Dados de peso, treinos, alimentação e caminhadas ficam no localStorage deste navegador. Fotos ficam no IndexedDB. Não existe conta nem sincronização entre dispositivos.')+'</p><div style="display:flex;gap:8px;flex-wrap:wrap">'+action("export","⬇ Exportar registros","btn secondary")+action("clear","🗑 Apagar dados","btn danger")+'</div><p class="footnote">A exportação JSON não inclui fotos. Limpar os dados do navegador pode apagar o histórico.</p></section></div><div class="notice" style="margin-top:20px">'+(cloud?'EvoluFit v0.2: seus registros estão vinculados à sua conta. Alarmes ainda dependem do navegador aberto.':'Versão de demonstração EvoluFit v0.1. Novos recursos virão após testes de segurança, acessibilidade e privacidade.')+'</div>';
@@ -208,14 +282,19 @@ async function loadPhotos(){
 }
 function drawClock(){
  const el=$("#clock");if(!el)return;
- const v=Math.max(0,sec);el.textContent=pad(Math.floor(v/60))+":"+pad(v%60);
- let b=document.querySelector('[data-action="timer-toggle"]');if(b)b.textContent=running?"⏸ Pausar":"▶ Iniciar";
+ const v=Math.max(0,sec);
+ el.textContent=pad(Math.floor(v/3600))+":"+pad(Math.floor((v%3600)/60))+":"+pad(v%60);
+ const b=document.querySelector('[data-action="timer-toggle"]');
+ if(b)b.textContent=running?"⏸ Pausar":"▶ Iniciar";
 }
+
 function stepClock(){
+ const wall=$("#wall-clock");if(wall)wall.textContent=new Date().toLocaleTimeString("pt-BR",{hour12:false});
  if(!running)return;
  if(chronoMode==="desc"){sec=Math.max(0,sec-1);if(sec===0){running=false;toast("⏰ Seu tempo terminou!");}}
  else{sec++;}drawClock();
 }
+
 function checkMeals(){
  if(!data.notifications||!("Notification" in window)||Notification.permission!=="granted")return;
  const now=new Date(),time=pad(now.getHours())+":"+pad(now.getMinutes());
@@ -232,6 +311,8 @@ function downloadJson(){
 document.addEventListener("click",async e=>{
  const b=e.target.closest("[data-action]");if(!b)return;
  const act=b.dataset.action,idv=b.dataset.id; if(act==="meal-check")return;
+ if(act==="toggle-menu"){document.body.classList.toggle("menu-open");return;}
+ if(act==="close-menu"){document.body.classList.remove("menu-open");return;}
  if(act==="goto"){location.hash=b.dataset.target;return;}
  if(act==="open-training"){const p=PLANS.find(p=>p.id===b.dataset.plan);if(p)modalTraining(p);return;}
  if(act==="finish-plan"){const p=PLANS.find(p=>p.id===b.dataset.plan);if(!p)return;
@@ -297,7 +378,7 @@ document.addEventListener("submit",async e=>{
  catch(err){console.error(err);toast("Falha ao guardar foto. Verifique sua conexão e tente novamente.");}return;
  }
 });
-window.addEventListener("hashchange",()=>{view=(location.hash||"#inicio").slice(1);render();window.scrollTo(0,0);});
+window.addEventListener("hashchange",()=>{document.body.classList.remove("menu-open");view=(location.hash||"#inicio").slice(1);render();window.scrollTo(0,0);});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
 window.EvoluApp={
  getData:()=>data,

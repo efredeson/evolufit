@@ -166,7 +166,9 @@
     btn.textContent = "Sair da conta";
     btn.title = api.user?.email || "Minha conta";
     btn.addEventListener("click", signOut);
-    bar.appendChild(btn);
+    const sidebarFooter = document.querySelector("#sidebar .sidebarfoot");
+    if (sidebarFooter) {btn.classList.add("efm-logout");sidebarFooter.appendChild(btn);}
+    else bar.appendChild(btn);
   }
   function scheduleSave(payload) {
     if (!api.active || !api.user) return;

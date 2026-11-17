@@ -5,9 +5,15 @@
   "start_url": "./#inicio",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#060b08",
+  "background_color": "#000000",
   "theme_color": "#a8fa13",
   "icons": [
+    {
+      "src": "assets/evolufit-symbol-amoled.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "assets/evolufit-gatinho-hd.webp",
       "sizes": "1254x1254",

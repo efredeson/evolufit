@@ -170,7 +170,7 @@ function modalTraining(plan){
  '<span class="pill">'+plan.level+' • '+plan.time+' min</span>'+
  '<h3 style="margin:19px 0 12px">Exercícios ilustrados</h3>'+
  '<div class="exercise-sequence">'+plan.steps.map(exerciseRow).join("")+'</div>'+
- '<p class="footnote">Imagens esquemáticas: são exemplos, não substituem orientação profissional. Adapte ao seu ritmo; pare se sentir dor, tontura ou falta de ar incomum.</p>'+
+ '<p class="footnote">Imagens demonstrativas geradas por IA; são exemplos, não substituem orientação profissional. Adapte ao seu ritmo; pare se sentir dor, tontura ou falta de ar incomum.</p>'+
  '<div class="dialogbtns">'+action("close","Voltar","btn secondary")+
  action("finish-plan","✓ Concluir treino","btn",'data-plan="'+plan.id+'"')+'</div></div>');
 }

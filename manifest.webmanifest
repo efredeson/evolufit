@@ -9,6 +9,12 @@
   "theme_color": "#16a34a",
   "icons": [
     {
+      "src": "assets/evolufit-mark-v2.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
       "src": "assets/cat.webp",
       "sizes": "80x80",
       "type": "image/webp",

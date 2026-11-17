@@ -276,8 +276,8 @@ public class MainActivity extends Activity {
         clock.setBackground(bg(0xff0b1c0a,GREEN,70));clock.setPadding(dp(7),dp(16),dp(7),dp(16));
         timerValue=clock;c.addView(clock,lp(-1,97,12));
         c.addView(button(clockRunning?"⏸ PAUSAR":"▶ "+(guideResting?"CONTAR DESCANSO":"INICIAR TEMPO"),true,()->{toggleClock();render();}),lp(-1,-2,9));
-        if(!guideResting){
-            c.addView(button("⏱ DESCANSAR 30s",false,()->{pauseClock();sessionElapsed+=elapsedBefore;elapsedBefore=0;countdown=true;countdownTotal=30000L;guideResting=true;clockRunning=true;runningFrom=SystemClock.elapsedRealtime();render();}),lp(-1,-2,11));
+        if(!guideResting&&exerciseIndex<3){
+            c.addView(button("⏱ DESCANSAR 30s E AVANÇAR",false,()->{finishStep();exerciseIndex++;countdown=true;countdownTotal=30000L;guideResting=true;clockRunning=true;runningFrom=SystemClock.elapsedRealtime();render();}),lp(-1,-2,11));
         }
         LinearLayout next=row();next.addView(button("‹ ANTERIOR",false,()->{if(exerciseIndex>0){finishStep();exerciseIndex--;guideResting=false;render();}}),new LinearLayout.LayoutParams(0,dp(50),1));
         TextView advance=button(guideResting?"PULAR PAUSA ›":exerciseIndex==3?"✓ CONCLUIR":"PRÓXIMO ›",false,()->{

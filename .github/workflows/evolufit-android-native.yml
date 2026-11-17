@@ -1,0 +1,50 @@
+name: EvoluFit Android Nativo - APK teste
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'android-native/**'
+      - '.github/workflows/evolufit-android-native.yml'
+permissions:
+  contents: read
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar projeto EvoluFit
+        uses: actions/checkout@v4
+      - name: Preparar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Preparar SDK Android
+        uses: android-actions/setup-android@v3
+      - name: Instalar Android 35
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Preparar Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Obter imagens originais aprovadas do projeto
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p android-native/app/src/main/assets/exercises android-native/app/src/main/res/drawable-nodpi
+          BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/assets"
+          curl -fL --retry 3 "$BASE/evolufit-gatinho-hd.webp" -o android-native/app/src/main/assets/mascot.webp
+          curl -fL --retry 3 "$BASE/evolufit-gatinho-hd.webp" -o android-native/app/src/main/res/drawable-nodpi/launcher.webp
+          for image in marcha cadeira bracos lateral agachamento parede prancha alongamento; do
+            curl -fL --retry 3 "$BASE/exercicios/${image}-foto.webp" -o "android-native/app/src/main/assets/exercises/${image}.webp"
+          done
+          test -s android-native/app/src/main/assets/mascot.webp
+      - name: Compilar APK Android sem WebView
+        run: gradle --no-daemon --project-dir android-native :app:assembleDebug
+      - name: Disponibilizar APK para teste
+        uses: actions/upload-artifact@v4
+        with:
+          name: EvoluFit-Android-Nativo-debug-APK
+          path: android-native/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 30

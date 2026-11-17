@@ -151,20 +151,24 @@ function exerciseGuide(step){
 }
 const REAL_EXERCISES = new Set(["marcha","cadeira","bracos","lateral","agachamento","parede","prancha","alongamento"]);
 function exerciseImage(kind){
- return EXERCISE_IMAGE_ROOT+kind+(REAL_EXERCISES.has(kind)?"-foto.webp":".svg");
+ return REAL_EXERCISES.has(kind)?EXERCISE_IMAGE_ROOT+kind+"-foto.webp":null;
 }
-function exerciseRow(step, index){
- const g=exerciseGuide(step), src=exerciseImage(g.kind);
- return '<details class="exercise-step"><summary><img src="'+src+'" loading="lazy" alt="Ilustração das posições do exercício">'+
+function noPhotoVisual(){
+ return '<span class="exercise-no-photo">'+uiIcon("treinos",27)+'<small>Imagem em preparação</small></span>';
+}
+function exerciseRow(step,index){
+ const guide=exerciseGuide(step),src=exerciseImage(guide.kind);
+ const summaryImage=src?'<img src="'+src+'" loading="lazy" alt="Duas posições demonstrativas de '+es(step)+'">':noPhotoVisual();
+ const detailsImage=src?'<img src="'+src+'" loading="lazy" alt="Exemplo com duas posições para '+es(step)+'">':noPhotoVisual();
+ return '<details class="exercise-step"><summary>'+summaryImage+
  '<span class="exercise-step-title"><strong>'+es(step)+'</strong><small>Toque para ver como fazer</small></span>'+
  '<span class="exercise-chevron" aria-hidden="true">⌄</span></summary>'+
- '<div class="exercise-extra"><img src="'+src+'" loading="lazy" alt="Exemplo ilustrado em duas posições para '+es(step)+'">'+
- '<p>'+es(g.tip)+'</p></div></details>';
+ '<div class="exercise-extra">'+detailsImage+'<p>'+es(guide.tip)+'</p></div></details>';
 }
 
 function trainings(){
  const cards=PLANS.map(p=>{
- const preview={inicio:"cadeira",corpo:"agachamento",mob:"alongamento",energia:"polichinelo"}[p.id]||"marcha";
+ const preview={inicio:"cadeira",corpo:"agachamento",mob:"alongamento",energia:"agachamento"}[p.id]||"marcha";
  return '<article class="card training animated"><div class="cardhead"><span class="symbol">'+uiIcon(p.id==="mob"?"meta":p.id==="energia"?"cronometro":"treinos",31)+'</span><span class="pill">'+p.level+'</span></div>'+
  '<img class="plan-preview" src="'+exerciseImage(preview)+'" loading="lazy" alt="Exemplo ilustrado do treino">'+
  '<h3>'+p.title+'</h3><p>'+p.desc+'</p><div class="hint">⏱ '+p.time+' minutos · '+p.steps.length+' exercícios</div>'+
@@ -239,7 +243,7 @@ function closeModal(){$("#modal").hidden=true;$("#modal").innerHTML="";}
 function modalTraining(plan){
  showModal('<div class="exercise-modal"><h2>'+es(plan.title)+'</h2><p>'+es(plan.desc)+'</p>'+
  '<span class="pill">'+plan.level+' • '+plan.time+' min</span>'+
- '<h3 style="margin:19px 0 12px">Exercícios ilustrados</h3>'+
+ '<h3 style="margin:19px 0 12px">Exercícios e demonstrações</h3>'+
  '<div class="exercise-sequence">'+plan.steps.map(exerciseRow).join("")+'</div>'+
  '<p class="footnote">Imagens demonstrativas geradas por IA; são exemplos, não substituem orientação profissional. Adapte ao seu ritmo; pare se sentir dor, tontura ou falta de ar incomum.</p>'+
  '<div class="dialogbtns">'+action("close","Voltar","btn secondary")+

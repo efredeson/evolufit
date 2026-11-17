@@ -27,6 +27,7 @@ let data=load(),view=(location.hash||"#inicio").slice(1);
 let sec=300,running=false,interval=null,chronoMode="desc";
 let photoUrls=[];
 function load(){
+ if(window.EVOLUFIT_SUPABASE?.url && window.EVOLUFIT_SUPABASE?.publishableKey)return defaultData();
  try{const d=JSON.parse(localStorage.getItem(KEY));if(!d||typeof d!=="object")return defaultData();
  const base=defaultData();return {...base,...d,profile:{...base.profile,...d.profile},
  walks:Array.isArray(d.walks)?d.walks:[],workouts:Array.isArray(d.workouts)?d.workouts:[],weights:Array.isArray(d.weights)?d.weights:[],
@@ -34,6 +35,9 @@ function load(){
  }catch(_){return defaultData();}
 }
 function save(){
+ if(window.EVOLUFIT_SUPABASE?.url && window.EVOLUFIT_SUPABASE?.publishableKey){
+   window.EvoluCloud?.scheduleSave(data);return;
+ }
  try{localStorage.setItem(KEY,JSON.stringify(data));}catch(_){toast("O armazenamento local está cheio ou indisponível.");}
 }
 function toast(t){
@@ -53,9 +57,10 @@ function empty(t,sub,em="🌿"){return '<div class="empty"><div class="em">'+em+
 function action(name,label,cls="btn",extra=""){return '<button class="'+cls+'" data-action="'+name+'" '+extra+'>'+label+'</button>';}
 function nav(){
  const all= NAV.map((n,i)=>(i===5?'<div class="navtitle">MINHA JORNADA</div>':i===0?'<div class="navtitle">MENU PRINCIPAL</div>':"")+'<a href="#'+n[0]+'" class="navlink '+(view===n[0]?"active":"")+'"><span class="navemoji">'+n[2]+'</span>'+n[1]+'</a>').join("");
- $("#sidebar").innerHTML='<a href="#inicio" class="brand"><img src="assets/cat.webp" onerror="this.style.display=\'none\'" alt="Gatinho EvoluFit"><span>Evolu<em>Fit</em></span></a>'+all+'<div class="sidebarfoot">💚 Um dia de cada vez. Pequenos hábitos, grandes conquistas.<br><br><small>Protótipo v0.1 • Dados locais</small></div>';
+ $("#sidebar").innerHTML='<a href="#inicio" class="brand"><img src="assets/cat.webp" onerror="this.style.display=\'none\'" alt="Gatinho EvoluFit"><span>Evolu<em>Fit</em></span></a>'+all+'<div class="sidebarfoot">💚 Um dia de cada vez. Pequenos hábitos, grandes conquistas.<br><br><small>'+(window.EvoluCloud?.active?'EvoluFit v0.2 • Nuvem privada':'Protótipo v0.1 • Dados locais')+'</small></div>';
  $("#topbar").innerHTML='<strong>EvoluFit <span> / '+es(NAV.find(n=>n[0]===view)?.[1]||"Início")+'</span></strong><a class="avatar" href="#ajustes" aria-label="Meu perfil">'+es((data.profile.name||"E")[0].toUpperCase())+'</a>';
  $("#bottomnav").innerHTML=[...NAV.slice(0,5),NAV[7]].map(n=>'<a href="#'+n[0]+'" class="'+(view===n[0]?"active":"")+'"><b>'+n[2]+'</b><span>'+n[1]+'</span></a>').join("");
+ window.EvoluCloud?.decorateNav();
 }
 function render(){
  if(!NAV.find(n=>n[0]===view))view="inicio";
@@ -103,13 +108,17 @@ function evolution(){
  return title("Minha evolução","Seu histórico no seu ritmo — sem comparações com outras pessoas.","SEU PROGRESSO")+'<div class="grid cards">'+stat("Peso atual",current?money(current):"—","último registro","⚖️")+stat("Altura",data.profile.height?data.profile.height+" cm":"—","valor informado","📏")+stat("IMC",bmi||"—","indicador informativo","📐")+stat("Meta pessoal",target?money(target):"—",current&&target?"diferença: "+money(Math.abs(current-target)):"opcional","🎯")+'</div><div class="grid two"><section class="card"><h2>Registrar peso</h2><form data-form="weight" class="formgrid"><div class="field"><label>Peso (kg)</label><input type="number" name="weight" min="10" max="500" step="0.1" required></div><div class="field"><label>Data</label><input type="date" name="date" max="'+today()+'" value="'+today()+'" required></div><div class="field full"><button class="btn">Salvar registro</button></div></form><div class="notice" style="margin-top:18px">O IMC isolado não é diagnóstico nem determina quanto alguém deve emagrecer.</div></section><section class="card"><h2>Gráfico de peso</h2>'+bars+'</section></div><section class="card" style="margin-top:20px"><h2>Histórico de medidas</h2>'+(items||empty("Nenhum peso registrado","Você pode começar quando quiser.","⚖️"))+'</section>';
 }
 function photos(){
- return title("Fotos da evolução","Guarde seus registros por data e compare seu progresso.", "SUA GALERIA",action("add-photo","＋ Adicionar foto"))+'<div class="notice">🔒 As fotos ficam somente neste navegador (IndexedDB), não são enviadas ao GitHub ou à internet. Evite dispositivos compartilhados e faça cópias de segurança.</div><section class="card" style="margin-top:20px"><div class="cardhead"><h2>Minha galeria</h2><span class="pill">Privada neste dispositivo</span></div><div id="photo-list">'+empty("Carregando fotos","Seus registros aparecerão aqui.","📸")+'</div></section>';
+ const cloud=!!window.EvoluCloud?.active;
+ return title("Fotos da evolução","Guarde seus registros por data e compare seu progresso.", "SUA GALERIA",action("add-photo","＋ Adicionar foto"))+
+ (cloud?'<div class="notice">🔒 Fotos privadas no Supabase, acessíveis somente na sua conta. Evite imagens íntimas ou de outras pessoas.</div>':'<div class="notice">🔒 As fotos ficam somente neste navegador (IndexedDB), não são enviadas ao GitHub ou à internet. Evite dispositivos compartilhados e faça cópias de segurança.</div>')+
+ '<section class="card" style="margin-top:20px"><div class="cardhead"><h2>Minha galeria</h2><span class="pill">'+(cloud?'Conta privada':'Neste dispositivo')+'</span></div><div id="photo-list">'+empty("Carregando fotos","Seus registros aparecerão aqui.","📸")+'</div></section>';
 }
 function timer(){
  return title("Cronômetro","Use nos exercícios, descanso ou caminhada.","SEU TEMPO")+'<section class="card" style="max-width:700px;margin:auto;text-align:center"><div class="pill">⏱️ '+(chronoMode==="desc"?"Contagem regressiva":"Cronômetro crescente")+'</div><div id="clock" class="clock">05:00</div><div class="timerbuttons">'+action("timer-toggle",running?"⏸ Pausar":"▶ Iniciar")+action("timer-reset","↺ Reiniciar","btn secondary")+action("timer-mode","↔ Trocar modo","btn secondary")+'</div><div class="timerbuttons" style="margin-top:18px">'+[30,60,120,300,600].map(s=>action("timer-preset",s>=60?s/60+" min":s+" s","btn secondary small",'data-seconds="'+s+'"')).join("")+'</div><p class="footnote">O timer funciona enquanto a página permanece ativa. O sistema pode suspender a contagem no segundo plano.</p></section>';
 }
 function settings(){
- return title("Configurações","Personalize seu perfil e cuide dos seus registros.","MEU EVOLUFIT")+'<div class="grid two"><section class="card"><h2>Meu perfil</h2><form data-form="profile" class="formgrid"><div class="field full"><label>Nome ou apelido</label><input name="name" maxlength="60" value="'+es(data.profile.name)+'"></div><div class="field"><label>Altura (cm)</label><input type="number" name="height" min="80" max="240" value="'+es(data.profile.height)+'" placeholder="Ex: 170"></div><div class="field"><label>Peso-meta opcional (kg)</label><input type="number" name="goal" min="10" max="500" step="0.1" value="'+es(data.profile.goal)+'" placeholder="Ex: 70"></div><div class="field full"><button class="btn">Salvar perfil</button></div></form><p class="footnote">Metas pessoais podem ser de manutenção ou evolução de hábitos; emagrecer não é obrigatório.</p></section><section class="card"><h2>Privacidade & dados</h2><p>Dados de peso, treinos, alimentação e caminhadas ficam no localStorage deste navegador. Fotos ficam no IndexedDB. Não existe conta nem sincronização entre dispositivos.</p><div style="display:flex;gap:8px;flex-wrap:wrap">'+action("export","⬇ Exportar registros","btn secondary")+action("clear","🗑 Apagar dados","btn danger")+'</div><p class="footnote">A exportação JSON não inclui fotos. Limpar os dados do navegador pode apagar o histórico.</p></section></div><div class="notice" style="margin-top:20px">Versão de demonstração EvoluFit v0.1. Novos recursos virão após testes de segurança, acessibilidade e privacidade.</div>';
+ const cloud=!!window.EvoluCloud?.active;
+ return title("Configurações","Personalize seu perfil e cuide dos seus registros.","MEU EVOLUFIT")+'<div class="grid two"><section class="card"><h2>Meu perfil</h2><form data-form="profile" class="formgrid"><div class="field full"><label>Nome ou apelido</label><input name="name" maxlength="60" value="'+es(data.profile.name)+'"></div><div class="field"><label>Altura (cm)</label><input type="number" name="height" min="80" max="240" value="'+es(data.profile.height)+'" placeholder="Ex: 170"></div><div class="field"><label>Peso-meta opcional (kg)</label><input type="number" name="goal" min="10" max="500" step="0.1" value="'+es(data.profile.goal)+'" placeholder="Ex: 70"></div><div class="field full"><button class="btn">Salvar perfil</button></div></form><p class="footnote">Metas pessoais podem ser de manutenção ou evolução de hábitos; emagrecer não é obrigatório.</p></section><section class="card"><h2>Privacidade & dados</h2><p>'+(cloud?'Registros e fotos sincronizados com sua conta privada no Supabase. Não compartilhe sua senha. Alterações simultâneas em vários dispositivos podem sobrescrever registros.':'Dados de peso, treinos, alimentação e caminhadas ficam no localStorage deste navegador. Fotos ficam no IndexedDB. Não existe conta nem sincronização entre dispositivos.')+'</p><div style="display:flex;gap:8px;flex-wrap:wrap">'+action("export","⬇ Exportar registros","btn secondary")+action("clear","🗑 Apagar dados","btn danger")+'</div><p class="footnote">A exportação JSON não inclui fotos. Limpar os dados do navegador pode apagar o histórico.</p></section></div><div class="notice" style="margin-top:20px">'+(cloud?'EvoluFit v0.2: seus registros estão vinculados à sua conta. Alarmes ainda dependem do navegador aberto.':'Versão de demonstração EvoluFit v0.1. Novos recursos virão após testes de segurança, acessibilidade e privacidade.')+'</div>';
 }
 function showModal(markup){let m=$("#modal");m.hidden=false;m.innerHTML='<div class="dialog" role="dialog" aria-modal="true">'+markup+'</div>';m.addEventListener("click",outside,{once:true});}
 function outside(e){if(e.target===$("#modal"))closeModal();}
@@ -118,7 +127,7 @@ function modalTraining(plan){
  showModal('<h2>'+es(plan.title)+'</h2><p>'+es(plan.desc)+'</p><span class="pill">'+plan.level+' • '+plan.time+' min</span><h3 style="margin:20px 0 5px">Sequência sugerida</h3>'+plan.steps.map((s,i)=>'<div class="listitem"><span class="circle">'+(i+1)+'</span><div class="grow"><strong>'+es(s)+'</strong></div></div>').join("")+'<p class="footnote">Ajuste ou interrompa se sentir desconforto. Estes exercícios são gerais, não avaliação individual.</p><div class="dialogbtns">'+action("close","Voltar","btn secondary")+action("finish-plan","✓ Concluir treino","btn",'data-plan="'+plan.id+'"')+'</div>');
 }
 function modalPhoto(){
- showModal('<h2>Adicionar foto da evolução</h2><p>Foto guardada somente neste dispositivo.</p><form data-form="photo" class="formgrid"><div class="field full"><label>Escolher imagem (JPG, PNG ou WebP)</label><input type="file" name="photo" accept="image/*" required></div><div class="field"><label>Data</label><input type="date" name="date" max="'+today()+'" value="'+today()+'" required></div><div class="field"><label>Observação</label><input name="note" maxlength="60" placeholder="Ex: Primeiro dia"></div><div class="field full"><button class="btn">Guardar foto</button></div></form>'+action("close","Cancelar","btn secondary")+'<p class="footnote">Fotos não são incluídas na exportação JSON. Não compartilhe seu dispositivo com outras pessoas se armazenar fotos pessoais.</p>');
+ showModal('<h2>Adicionar foto da evolução</h2><p>'+(window.EvoluCloud?.active?'Foto guardada de forma privada na sua conta.':'Foto guardada somente neste dispositivo.')+'</p><form data-form="photo" class="formgrid"><div class="field full"><label>Escolher imagem (JPG, PNG ou WebP)</label><input type="file" name="photo" accept="image/*" required></div><div class="field"><label>Data</label><input type="date" name="date" max="'+today()+'" value="'+today()+'" required></div><div class="field"><label>Observação</label><input name="note" maxlength="60" placeholder="Ex: Primeiro dia"></div><div class="field full"><button class="btn">Guardar foto</button></div></form>'+action("close","Cancelar","btn secondary")+'<p class="footnote">Fotos não são incluídas na exportação JSON. Não compartilhe seu dispositivo com outras pessoas se armazenar fotos pessoais.</p>');
 }
 function photoDB(){
  return new Promise((resolve,reject)=>{
@@ -128,6 +137,8 @@ function photoDB(){
  });
 }
 async function photoOp(mode,item){
+ if(window.EvoluCloud?.active)return window.EvoluCloud.photoOp(mode,item);
+ if(window.EVOLUFIT_SUPABASE?.url && window.EVOLUFIT_SUPABASE?.publishableKey)throw new Error("Entre na sua conta.");
  const db=await photoDB();
  return new Promise((resolve,reject)=>{
  const tx=db.transaction("photos",mode==="get"?"readonly":"readwrite"),store=tx.objectStore("photos");
@@ -183,7 +194,7 @@ document.addEventListener("click",async e=>{
  if(act==="remove-weight"){if(confirm("Excluir este peso?")){data.weights=data.weights.filter(x=>x.id!==idv);save();render();}return;}
  if(act==="remove-meal"){if(confirm("Excluir este horário?")){data.meals=data.meals.filter(x=>x.id!==idv);save();render();}return;}
  if(act==="add-photo"){modalPhoto();return;}
- if(act==="photo-delete"){if(confirm("Excluir esta foto deste navegador?")){try{await photoOp("delete",idv);await loadPhotos();toast("Foto excluída.");}catch(_){toast("Não foi possível excluir a foto.");}}return;}
+ if(act==="photo-delete"){if(confirm("Excluir esta foto permanentemente?")){try{await photoOp("delete",idv);await loadPhotos();toast("Foto excluída.");}catch(_){toast("Não foi possível excluir a foto.");}}return;}
  if(act==="notify"){if(!("Notification" in window)){toast("Navegador sem suporte a notificações.");return;}
  const p=await Notification.requestPermission();data.notifications=p==="granted";save();toast(data.notifications?"Lembretes ativados enquanto o app estiver aberto.":"Permissão não concedida.");return;}
  if(act==="timer-toggle"){running=!running;drawClock();return;}
@@ -191,8 +202,14 @@ document.addEventListener("click",async e=>{
  if(act==="timer-mode"){running=false;chronoMode=chronoMode==="desc"?"up":"desc";sec=chronoMode==="desc"?300:0;render();return;}
  if(act==="timer-preset"){running=false;chronoMode="desc";sec=Number(b.dataset.seconds);render();return;}
  if(act==="export"){downloadJson();toast("Registros exportados.");return;}
- if(act==="clear"){if(!confirm("Apagar dados e fotos salvos neste navegador? Esta ação não pode ser desfeita."))return;
- localStorage.removeItem(KEY);try{await photoOp("clear");}catch(_){}data=defaultData();render();toast("Dados locais apagados.");return;}
+ if(act==="clear"){
+ if(window.EvoluCloud?.active){
+  if(!confirm("Apagar seus registros sincronizados? As fotos serão preservadas. Esta ação não pode ser desfeita."))return;
+  data=defaultData();save();render();toast("Registros limpos; fotos preservadas.");return;
+ }
+ if(!confirm("Apagar dados e fotos salvos neste navegador? Esta ação não pode ser desfeita."))return;
+ localStorage.removeItem(KEY);try{await photoOp("clear");}catch(_){}data=defaultData();render();toast("Dados locais apagados.");return;
+}
 });
 document.addEventListener("change",e=>{
  const t=e.target;
@@ -228,11 +245,23 @@ document.addEventListener("submit",async e=>{
  if(name==="photo"){
  const file=fd.get("photo"),date=String(fd.get("date")||""),note=String(fd.get("note")||"").slice(0,60);
  if(!(file instanceof File)||!file.size||file.size>8*1024*1024||!file.type.startsWith("image/")||!date||date>today()){toast("Use uma foto de até 8 MB com data válida.");return;}
- try{await photoOp("put",{id:id(),date,note,blob:file});closeModal();await loadPhotos();toast("Foto salva neste navegador!");}
- catch(err){console.error(err);toast("Armazenamento de fotos indisponível.");}return;
+ try{await photoOp("put",{id:id(),date,note,blob:file});closeModal();await loadPhotos();toast(window.EvoluCloud?.active?"Foto salva na sua conta!":"Foto salva neste navegador!");}
+ catch(err){console.error(err);toast("Falha ao guardar foto. Verifique sua conexão e tente novamente.");}return;
  }
 });
 window.addEventListener("hashchange",()=>{view=(location.hash||"#inicio").slice(1);render();window.scrollTo(0,0);});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
+window.EvoluApp={
+ getData:()=>data,
+ setData:(payload)=>{
+  const base=defaultData();
+  data={...base,...payload,profile:{...base.profile,...(payload?.profile||{})},
+   walks:Array.isArray(payload?.walks)?payload.walks:[],workouts:Array.isArray(payload?.workouts)?payload.workouts:[],
+   weights:Array.isArray(payload?.weights)?payload.weights:[],meals:Array.isArray(payload?.meals)?payload.meals:base.meals,
+   water:payload?.water||{},mealDone:payload?.mealDone||{}};
+  render();
+ },
+ defaultData,render,showToast:toast
+};
 interval=setInterval(()=>{stepClock();checkMeals();},1000);
 render();

@@ -10,7 +10,7 @@
   "icons": [
     {
       "src": "assets/cat.webp",
-      "sizes": "128x128",
+      "sizes": "80x80",
       "type": "image/webp",
       "purpose": "any"
     }

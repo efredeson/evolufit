@@ -99,7 +99,10 @@ function exerciseGuide(step){
  const found=EXERCISE_GUIDES.find(item=>item[0].test(step));
  return {kind:found?found[1]:"marcha", tip:found?found[2]:"Faça o movimento devagar, com controle e respeitando seus limites."};
 }
-function exerciseImage(kind){return EXERCISE_IMAGE_ROOT+kind+".svg";}
+const REAL_EXERCISES = new Set(["marcha","cadeira","bracos","lateral","agachamento","parede","prancha","alongamento"]);
+function exerciseImage(kind){
+ return EXERCISE_IMAGE_ROOT+kind+(REAL_EXERCISES.has(kind)?"-foto.webp":".svg");
+}
 function exerciseRow(step, index){
  const g=exerciseGuide(step), src=exerciseImage(g.kind);
  return '<details class="exercise-step"><summary><img src="'+src+'" loading="lazy" alt="Ilustração das posições do exercício">'+

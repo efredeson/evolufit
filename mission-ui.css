@@ -271,3 +271,12 @@ h1,h2,.pageheading h1,.efm-display,.efm-heading{font-style:italic}
  .efm-splash-mark{width:min(68vw,260px)}
  .efm-splash-wordmark{font-size:clamp(60px,16vw,88px)}
 }
+
+.efm-logout{display:block;width:100%;min-height:38px;margin-top:12px;padding:7px 10px;color:#ff9999!important;background:#1c0d0e!important;border:1px solid #764041!important;border-radius:9px;text-align:left;font:800 18px "Barlow Condensed",sans-serif!important;cursor:pointer}
+.efm-logout:hover{background:#391b1c!important}
+.efm-splash-actions .cloud-primary{display:block;width:100%}
+.efm-auth-splash .efm-splash-actions{max-width:365px}
+@media(max-width:760px){
+ .sidebar .efm-logout{margin:10px 0 0}
+ .efm-top-greeting{display:none}
+}

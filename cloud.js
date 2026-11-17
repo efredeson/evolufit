@@ -13,6 +13,7 @@
   let client, session = null, mode = "login", busy = false;
   let pending = null, dirty = false, writing = false, saveTimer = null;
   let loadingUser = null;
+  let recoveryPending = /(?:[?#&])type=recovery(?:&|$)/.test(location.href);
 
   const safe = x => String(x ?? "").replace(/[&<>"']/g, c => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
@@ -91,6 +92,8 @@
       } else if (mode === "update") {
         response = await client.auth.updateUser({password});
         if (response.error) throw response.error;
+        recoveryPending = false;
+        mode = "login";
         setMessage("Senha alterada.","success");
         await activate((await client.auth.getSession()).data.session);
       }
@@ -157,7 +160,12 @@
     saveTimer = setTimeout(() => { void flush(); }, 900);
   }
   async function flush() {
-    if (writing || !dirty || !session?.user) return;
+    if (writing) {
+      while (writing) await new Promise(resolve => setTimeout(resolve,50));
+      if (dirty) return flush();
+      return;
+    }
+    if (!dirty || !session?.user) return;
     writing = true;
     while (dirty && session?.user) {
       dirty = false;
@@ -240,15 +248,17 @@
   showLoading("Verificando sua conta...");
   client.auth.onAuthStateChange((event,nextSession) => {
     if (event === "PASSWORD_RECOVERY") {
+      recoveryPending = true;
       setTimeout(() => showForm("update"),0);
     } else if (event === "SIGNED_OUT") {
       setTimeout(deactivate,0);
-    } else if (event === "SIGNED_IN" && nextSession) {
+    } else if (event === "SIGNED_IN" && nextSession && !recoveryPending) {
       setTimeout(() => { void activate(nextSession); },0);
     }
   });
   client.auth.getSession().then(({data,error})=>{
     if (error) throw error;
+    if (recoveryPending) return showForm("update");
     if (data.session) return activate(data.session);
     showForm("login");
   }).catch(e=>fail(e.message || "Falha ao consultar sua sessão."));

@@ -7,6 +7,7 @@
   <meta name="description" content="Prévia da organização interna do EvoluFit, sem alterar seus registros reais.">
   <title>EvoluFit — Prévia de organização</title>
   <base href="../">
+  <link rel="manifest" href="organizar/manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="assets/evolufit-symbol-amoled.svg">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="theme-neon.css">
@@ -44,6 +45,11 @@
     if(hash && hash !== '#' && location.hash !== hash) location.hash=hash;
     else if(hash && hash !== '#') dispatchEvent(new HashChangeEvent('hashchange'));
   },true);
+  </script>
+  <script>
+    if ("serviceWorker" in navigator && location.protocol === "https:") {
+      navigator.serviceWorker.register("organizar/sw.js", {scope:"/evolufit/organizar/"}).catch(()=>{});
+    }
   </script>
 </body>
 </html>

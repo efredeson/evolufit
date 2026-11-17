@@ -81,8 +81,47 @@ function home(){
  let drops=Array.from({length:8},(_,i)=>'<span class="'+(i<water?"filled":"")+'">💧</span>').join("");
  return hero+stats+'<div class="grid two"><section class="card"><div class="cardhead"><h2>Seu dia no EvoluFit</h2><span class="pill">Comece hoje</span></div>'+rows+'</section><section class="card"><div class="cardhead"><h2>Hidratação de hoje</h2><span class="pill">'+water+' copos</span></div><p class="sub">Registre a água que você tomou.</p><div class="waterdots">'+drops+'</div><div style="display:flex;gap:8px;flex-wrap:wrap">'+action("water-add","＋ Adicionar copo")+action("water-remove","↶ Desfazer","btn secondary")+'</div><p class="footnote">Contagem de hábito, não uma recomendação de quantidade.</p></section></div>';
 }
+
+const EXERCISE_IMAGE_ROOT = location.pathname.includes("/beta/") ? "../assets/exercicios/" : "assets/exercicios/";
+const EXERCISE_GUIDES = [
+  [/sentar e levantar/i,"cadeira","Use uma cadeira firme e estável. Sente devagar e levante com controle."],
+  [/flexão na parede/i,"parede","Apoie as mãos na parede, flexione os cotovelos e empurre suavemente de volta."],
+  [/agachamento/i,"agachamento","Afaste os pés e dobre quadris e joelhos devagar, sem forçar a amplitude."],
+  [/elevação dos calcanhares/i,"panturrilha","Com apoio firme, eleve os calcanhares e desça lentamente."],
+  [/prancha/i,"prancha","Mantenha a coluna alinhada, com os joelhos apoiados se necessário."],
+  [/polichinelo/i,"polichinelo","Abra uma perna de cada vez enquanto eleva os braços, sem saltar."],
+  [/passada apoiada/i,"passada","Segure um apoio estável e dobre os joelhos em uma passada curta e confortável."],
+  [/passos laterais/i,"lateral","Dê um passo para o lado e aproxime o outro pé, alternando as direções."],
+  [/elevação de braços/i,"bracos","Eleve os braços até onde for confortável e retorne devagar."],
+  [/rotação de ombros/i,"ombros","Faça pequenos círculos com os ombros, sem forçar a articulação."],
+  [/mobilidade de pescoço/i,"pescoco","Incline a cabeça suavemente para cada lado, sem puxar ou forçar."],
+  [/mobilidade de quadril/i,"quadril","Mova o quadril lentamente, mantendo os pés bem apoiados."],
+  [/alongamento/i,"alongamento","Alongue com leve tensão, sem balanços e sem dor."],
+  [/respiração e postura/i,"respiracao","Respire de forma confortável e mantenha o corpo relaxado e alinhado."],
+  [/marcha|caminh|desaceleração|aquec/i,"marcha","Marche no lugar, elevando os joelhos dentro do seu conforto e movimentando os braços."]
+];
+function exerciseGuide(step){
+ const found=EXERCISE_GUIDES.find(item=>item[0].test(step));
+ return {kind:found?found[1]:"marcha", tip:found?found[2]:"Faça o movimento devagar, com controle e respeitando seus limites."};
+}
+function exerciseImage(kind){return EXERCISE_IMAGE_ROOT+kind+".svg";}
+function exerciseRow(step, index){
+ const g=exerciseGuide(step), src=exerciseImage(g.kind);
+ return '<details class="exercise-step"><summary><img src="'+src+'" loading="lazy" alt="Ilustração das posições do exercício">'+
+ '<span class="exercise-step-title"><strong>'+es(step)+'</strong><small>Toque para ver como fazer</small></span>'+
+ '<span class="exercise-chevron" aria-hidden="true">⌄</span></summary>'+
+ '<div class="exercise-extra"><img src="'+src+'" loading="lazy" alt="Exemplo ilustrado em duas posições para '+es(step)+'">'+
+ '<p>'+es(g.tip)+'</p></div></details>';
+}
+
 function trainings(){
- const cards=PLANS.map(p=>'<article class="card training animated"><div class="cardhead"><span class="symbol">'+p.emoji+'</span><span class="pill">'+p.level+'</span></div><h3>'+p.title+'</h3><p>'+p.desc+'</p><div class="hint">⏱ '+p.time+' minutos · '+p.steps.length+' exercícios</div>'+action("open-training","Ver exercícios →","btn",'data-plan="'+p.id+'"')+'</article>').join("");
+ const cards=PLANS.map(p=>{
+ const preview={inicio:"cadeira",corpo:"agachamento",mob:"alongamento",energia:"polichinelo"}[p.id]||"marcha";
+ return '<article class="card training animated"><div class="cardhead"><span class="symbol">'+p.emoji+'</span><span class="pill">'+p.level+'</span></div>'+
+ '<img class="plan-preview" src="'+exerciseImage(preview)+'" loading="lazy" alt="Exemplo ilustrado do treino">'+
+ '<h3>'+p.title+'</h3><p>'+p.desc+'</p><div class="hint">⏱ '+p.time+' minutos · '+p.steps.length+' exercícios</div>'+
+ action("open-training","Ver exercícios →","btn",'data-plan="'+p.id+'"')+'</article>';
+}).join("");
  const history=[...data.workouts].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,7).map(w=>'<div class="listitem"><span class="circle">✅</span><div class="grow"><strong>'+es(w.title)+'</strong><small>'+es(w.date)+' · '+w.minutes+' min</small></div></div>').join("");
  return title("Treinos em casa","Escolha um treino e adapte ao seu condicionamento. Não precisa de academia.")+'<div class="grid two">'+cards+'</div><section class="card" style="margin-top:20px"><h2>Treinos concluídos</h2>'+(history||empty("Nenhum treino registrado","Seu histórico de atividades aparecerá aqui.","🏃"))+'</section><p class="footnote">Movimentos demonstrativos. Respeite seus limites e interrompa se houver dor, tontura ou falta de ar incomum.</p>';
 }
@@ -124,7 +163,13 @@ function showModal(markup){let m=$("#modal");m.hidden=false;m.innerHTML='<div cl
 function outside(e){if(e.target===$("#modal"))closeModal();}
 function closeModal(){$("#modal").hidden=true;$("#modal").innerHTML="";}
 function modalTraining(plan){
- showModal('<h2>'+es(plan.title)+'</h2><p>'+es(plan.desc)+'</p><span class="pill">'+plan.level+' • '+plan.time+' min</span><h3 style="margin:20px 0 5px">Sequência sugerida</h3>'+plan.steps.map((s,i)=>'<div class="listitem"><span class="circle">'+(i+1)+'</span><div class="grow"><strong>'+es(s)+'</strong></div></div>').join("")+'<p class="footnote">Ajuste ou interrompa se sentir desconforto. Estes exercícios são gerais, não avaliação individual.</p><div class="dialogbtns">'+action("close","Voltar","btn secondary")+action("finish-plan","✓ Concluir treino","btn",'data-plan="'+plan.id+'"')+'</div>');
+ showModal('<div class="exercise-modal"><h2>'+es(plan.title)+'</h2><p>'+es(plan.desc)+'</p>'+
+ '<span class="pill">'+plan.level+' • '+plan.time+' min</span>'+
+ '<h3 style="margin:19px 0 12px">Exercícios ilustrados</h3>'+
+ '<div class="exercise-sequence">'+plan.steps.map(exerciseRow).join("")+'</div>'+
+ '<p class="footnote">Imagens esquemáticas: são exemplos, não substituem orientação profissional. Adapte ao seu ritmo; pare se sentir dor, tontura ou falta de ar incomum.</p>'+
+ '<div class="dialogbtns">'+action("close","Voltar","btn secondary")+
+ action("finish-plan","✓ Concluir treino","btn",'data-plan="'+plan.id+'"')+'</div></div>');
 }
 function modalPhoto(){
  showModal('<h2>Adicionar foto da evolução</h2><p>'+(window.EvoluCloud?.active?'Foto guardada de forma privada na sua conta.':'Foto guardada somente neste dispositivo.')+'</p><form data-form="photo" class="formgrid"><div class="field full"><label>Escolher imagem (JPG, PNG ou WebP)</label><input type="file" name="photo" accept="image/*" required></div><div class="field"><label>Data</label><input type="date" name="date" max="'+today()+'" value="'+today()+'" required></div><div class="field"><label>Observação</label><input name="note" maxlength="60" placeholder="Ex: Primeiro dia"></div><div class="field full"><button class="btn">Guardar foto</button></div></form>'+action("close","Cancelar","btn secondary")+'<p class="footnote">Fotos não são incluídas na exportação JSON. Não compartilhe seu dispositivo com outras pessoas se armazenar fotos pessoais.</p>');

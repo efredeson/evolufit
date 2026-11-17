@@ -23,5 +23,6 @@
   <nav id="bottomnav" class="bottomnav" aria-label="Menu rápido"></nav>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <div id="modal" class="modal" hidden></div>
+  <script>if('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('./sw.js').catch(()=>{});</script>
 </body>
 </html>

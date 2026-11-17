@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title"><title id="title">EvoluFit — Gatinho fitness</title><defs>
+  <linearGradient id="shield" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0d311e"/><stop offset=".57" stop-color="#07190f"/><stop offset="1" stop-color="#194b23"/></linearGradient>
+  <linearGradient id="lime" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#d8ff24"/><stop offset=".44" stop-color="#7bf700"/><stop offset="1" stop-color="#19aa37"/></linearGradient>
+  <linearGradient id="silver" x1="0" y1="0" x2=".65" y2="1"><stop stop-color="#ffffff"/><stop offset=".55" stop-color="#d9dee1"/><stop offset="1" stop-color="#8e9a9e"/></linearGradient>
+  <linearGradient id="hoodie" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#5fe700"/><stop offset="1" stop-color="#126d32"/></linearGradient>
+  <linearGradient id="cap" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#35414b"/><stop offset="1" stop-color="#080b10"/></linearGradient>
+  <filter id="sh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#071f0f" flood-opacity=".35"/></filter>
+</defs><g filter="url(#sh)">
+<!-- Glossy shield silhouette -->
+<path d="M256 19 C344 50 433 84 449 167 C468 280 393 422 256 487 C116 421 43 280 62 167 C78 84 166 50 256 19Z" fill="url(#shield)" stroke="#111a18" stroke-width="20" stroke-linejoin="round"/>
+<path d="M256 26 C347 59 420 89 436 172 C449 272 384 406 256 472 C127 407 63 272 76 172 C92 90 165 58 256 26Z" fill="none" stroke="url(#lime)" stroke-width="13" stroke-linejoin="round"/>
+<path d="M256 51 C344 80 393 107 407 173" fill="none" stroke="#b6ff3d" opacity=".47" stroke-width="6" stroke-linecap="round"/>
+<!-- Ears -->
+<path d="M128 183 Q103 99 120 48 Q178 70 209 132" fill="url(#silver)" stroke="#151a1b" stroke-width="12" stroke-linejoin="round"/>
+<path d="M138 146 Q127 106 136 80 Q160 93 180 133Z" fill="#ff8d98" stroke="#652b38" stroke-width="4"/>
+<path d="M299 131 Q342 67 404 54 Q410 110 383 190" fill="url(#silver)" stroke="#151a1b" stroke-width="12" stroke-linejoin="round"/>
+<path d="M328 131 Q358 93 389 80 Q389 113 373 148Z" fill="#ff8d98" stroke="#652b38" stroke-width="4"/>
+<!-- Tabbied face -->
+<path d="M128 161 Q142 107 252 107 Q360 111 386 184 L380 264 Q358 342 256 350 Q157 345 119 275Z" fill="url(#silver)" stroke="#121717" stroke-width="13" stroke-linejoin="round"/>
+<path d="M149 166 L169 137 L186 168 L179 187Z M206 133 L225 116 L242 153 L227 170Z M276 136 L289 117 L308 159 L294 171Z M329 151 L350 134 L363 181 L340 192Z" fill="#677075"/>
+<path d="M129 238 L164 246 L137 259Z M143 276 L180 280 L150 296Z M379 234 L351 245 L377 264Z M368 273 L333 281 L362 296Z" fill="#919b9c"/>
+<!-- bright expressive eye -->
+<path d="M162 226 Q193 181 242 206 Q236 251 201 263 Q169 263 162 226Z" fill="#fff" stroke="#131917" stroke-width="9"/>
+<ellipse cx="204" cy="228" rx="21" ry="27" fill="url(#lime)" stroke="#265621" stroke-width="4"/>
+<ellipse cx="209" cy="228" rx="10" ry="23" fill="#102018"/>
+<circle cx="200" cy="217" r="7" fill="white"/>
+<!-- playful wink -->
+<path d="M275 226 Q306 198 349 229 M281 238 Q312 224 341 241" stroke="#131919" stroke-width="11" stroke-linecap="round" fill="none"/>
+<!-- muzzle and smile -->
+<path d="M182 284 Q205 262 242 274 Q269 263 309 281 Q309 318 257 326 Q202 322 182 284Z" fill="#fff" opacity=".94"/>
+<path d="M241 274 Q255 262 270 273 L258 288Z" fill="#f798a5" stroke="#25212a" stroke-width="5"/>
+<path d="M256 287 Q255 308 229 304 M256 287 Q260 312 287 302" fill="none" stroke="#202224" stroke-width="6" stroke-linecap="round"/>
+<path d="M252 302 Q262 305 277 302 Q271 320 261 321Z" fill="#e8647e"/>
+<!-- whiskers -->
+<path d="M189 282 L135 276 M186 294 L137 303 M323 283 L378 278 M322 297 L371 309" stroke="#26312e" stroke-width="5" stroke-linecap="round" fill="none"/>
+<!-- sporty headphones -->
+<path d="M128 236 Q118 143 188 134 M379 237 Q382 138 321 128" fill="none" stroke="#121718" stroke-width="15"/>
+<circle cx="137" cy="267" r="36" fill="url(#cap)" stroke="#101719" stroke-width="10"/><circle cx="137" cy="267" r="24" fill="url(#lime)"/><path d="M119 268 h9 l5-9 l7 19 l5-10 h10" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+<circle cx="378" cy="264" r="34" fill="url(#cap)" stroke="#101719" stroke-width="9"/><circle cx="378" cy="264" r="23" fill="url(#lime)"/>
+<!-- black and neon cap -->
+<path d="M147 170 Q168 91 246 74 Q327 60 365 142 L355 175 Q255 130 167 187Z" fill="url(#cap)" stroke="#111719" stroke-width="12" stroke-linejoin="round"/>
+<path d="M157 177 Q239 138 351 163 L357 181 Q246 158 143 198Z" fill="url(#lime)" stroke="#101515" stroke-width="8"/>
+<path d="M158 174 Q113 165 83 194 Q83 218 118 223 Q155 212 194 192" fill="url(#cap)" stroke="#111719" stroke-width="10"/>
+<path d="M164 176 Q124 178 101 202" fill="none" stroke="url(#lime)" stroke-width="8" stroke-linecap="round"/>
+<path d="M228 118 l8 9 14-19 13 12" fill="none" stroke="url(#lime)" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+<!-- green fitness hoodie / forearms -->
+<path d="M155 341 Q173 320 225 324 Q266 338 306 324 Q363 318 382 354 L397 418 Q328 461 254 474 Q165 449 121 413Z" fill="url(#hoodie)" stroke="#101c17" stroke-width="14" stroke-linejoin="round"/>
+<path d="M227 340 Q240 369 253 381 Q267 370 282 342" stroke="#ecffd0" stroke-width="8" fill="none" stroke-linecap="round"/>
+<path d="M251 390 l-11 17 h9 l8-10 l9 21 l10-17 h12" stroke="#e6ffef" stroke-width="5" stroke-linejoin="round" fill="none"/>
+<path d="M155 351 Q125 332 109 357 Q100 371 109 400 Q122 434 158 425 L189 411 Q201 391 189 376 L169 375 L168 356Z" fill="url(#silver)" stroke="#171c1d" stroke-width="11"/>
+<path d="M130 382 Q120 370 122 355 Q126 345 138 350 Q151 359 149 381 M149 386 Q180 366 190 388" fill="none" stroke="#8f9c9a" stroke-width="6" stroke-linecap="round"/>
+<path d="M342 350 Q370 332 387 353 Q401 385 391 413 Q379 430 349 418 L329 402Z" fill="url(#silver)" stroke="#14191b" stroke-width="11"/>
+<path d="M360 371 l8 13 l12-9" stroke="#a4acac" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+<!-- base logo spark -->
+<path d="M193 451 H222 L235 440 L251 459 L272 435 L283 450 H318" fill="none" stroke="#bbff49" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</g></svg>

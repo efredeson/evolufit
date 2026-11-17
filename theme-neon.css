@@ -332,3 +332,61 @@ option{background:#0d1b10;color:#fff}
  .ef-summary-grid .card{padding:17px}
  .ef-section-top{margin:18px 0 11px}
 }
+
+/* EvoluFit AMOLED BLACK: pixels truly off in the surrounding surfaces. */
+:root{
+ --bg:#000000;--white:#080c08;--panel:#050805;--panel-high:#0b100b;
+ --ink:#f2fff2;--muted:#a2b5a2;--line:#233524;--shadow:0 12px 32px #000b;
+}
+html{background-color:#000;color-scheme:dark}
+body, .shell,.bodyarea,.main{
+ background:#000!important;background-image:none!important;
+}
+.sidebar{background:#000!important;border-right-color:#213323}
+.topbar{background:#000!important;border-bottom-color:#243724;box-shadow:0 5px 30px #000b}
+.bottomnav{background:#000!important;border-top-color:#29402a}
+.card{background:linear-gradient(142deg,#0c110c,#020502 70%)!important;border-color:#29452a}
+.hero,.ef-newhero{
+ background:linear-gradient(120deg,#071108,#000 75%)!important;
+ border-color:#619c18
+}
+.hero:before{opacity:.17}
+.main .pageheading{
+ background:linear-gradient(125deg,#081208,#000 75%)!important;
+ border-color:#366126
+}
+.card .pill,.pill{background:#101d0c;border-color:#48792c}
+.btn.secondary{background:#070e08;border-color:#385a30}
+.listitem{border-color:#1c301f}
+.chart,.notice,.photo-card{background-color:#040704}
+.ef-action{background:linear-gradient(140deg,#0b110b,#000);border-color:#304a30}
+.ef-action:hover{background:#0e200e}
+.ef-newhero .hero{background:#000}
+.ef-newhero img{filter:drop-shadow(0 10px 10px #000)}
+#auth-root{background:#000!important}
+.cloud-auth-panel{background:linear-gradient(140deg,#080c08,#000)!important;border-color:#5b8b2b}
+.modal{background:rgba(0,0,0,.88)}
+.dialog{background:linear-gradient(150deg,#0c120d,#000)!important}
+.ef-brand-icon{display:inline-block;vertical-align:middle;filter:drop-shadow(0 0 4px #baff182e);flex-shrink:0}
+.ef-brand-icon path,.ef-brand-icon circle,.ef-brand-icon rect{vector-effect:non-scaling-stroke}
+.ef-icon-fallback{color:#b8ff38}
+.circle:has(.ef-brand-icon){font-size:0;display:grid;place-items:center}
+.training .symbol:has(.ef-brand-icon){display:grid;place-items:center;width:39px;height:39px}
+.waterdots span:has(.ef-brand-icon){color:#adff23}
+.ef-today-stats .circle{background:#081309;border-color:#254f1f}
+.exercise-no-photo{
+ display:flex;align-items:center;justify-content:center;gap:9px;flex-direction:column;
+ padding:16px;text-align:center;border-radius:12px;flex:none;
+ min-width:96px;background:#070f09;border:1px solid #2c5427;color:#c2eea1
+}
+.exercise-no-photo small{font-size:10px;line-height:1.25;color:#a1bca4}
+.exercise-step summary .exercise-no-photo{width:112px;min-height:78px;padding:6px}
+.exercise-step[open] .exercise-extra .exercise-no-photo{width:100%;min-height:160px;margin:10px 0}
+.exercise-step .exercise-extra .exercise-no-photo .ef-brand-icon{width:42px;height:42px}
+.exercise-step{background:#050805;border-color:#284429}
+.exercise-step[open]{background:#081208;border-color:#80c121}
+.exercise-extra{border-color:#233d26}
+@media(max-width:420px){
+ .exercise-step summary .exercise-no-photo{width:92px;min-height:68px;padding:5px}
+ .exercise-step summary .exercise-no-photo small{font-size:9px}
+}

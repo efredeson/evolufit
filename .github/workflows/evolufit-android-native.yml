@@ -7,7 +7,7 @@ on:
       - 'android-native/**'
       - '.github/workflows/evolufit-android-native.yml'
 permissions:
-  contents: read
+  contents: write
 jobs:
   build-apk:
     runs-on: ubuntu-latest
@@ -48,6 +48,14 @@ jobs:
           test -s android-native/app/src/main/assets/mascot.webp
       - name: Compilar APK Android sem WebView
         run: gradle --no-daemon --project-dir android-native :app:assembleDebug
+      - name: Validar instalador Android assinado
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="android-native/app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$APK"
+          sha256sum "$APK"
       - name: Disponibilizar APK para teste
         uses: actions/upload-artifact@v4
         with:
@@ -55,3 +63,22 @@ jobs:
           path: android-native/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 30
+      - name: Publicar APK direto no GitHub Releases
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          FILE="android-native/app/build/outputs/apk/debug/app-debug.apk"
+          cp "$FILE" android-native/EvoluFit-Nativo-Android-TESTE.apk
+          TAG="evolufit-android-teste-v0.1"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" android-native/EvoluFit-Nativo-Android-TESTE.apk --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" android-native/EvoluFit-Nativo-Android-TESTE.apk \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "EvoluFit Android Nativo — APK de teste" \
+              --notes "Versão experimental Android nativa, sem WebView. Baixe o arquivo .apk abaixo e instale pelo gerenciador de arquivos do Android. APK assinado com chave de debug; as próximas versões podem precisar desinstalar esta versão antes de instalar." \
+              --prerelease \
+              --target "$GITHUB_SHA"
+          fi

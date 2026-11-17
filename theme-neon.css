@@ -390,3 +390,31 @@ body, .shell,.bodyarea,.main{
  .exercise-step summary .exercise-no-photo{width:92px;min-height:68px;padding:5px}
  .exercise-step summary .exercise-no-photo small{font-size:9px}
 }
+
+/* Ícones originais da prancha aprovada · recorte exato, sem redesenho */
+.ef-approved-icon{
+ display:inline-block;vertical-align:middle;flex-shrink:0;
+ background-color:transparent;
+ background-repeat:no-repeat;
+ background-size:400% 400%;
+ border-radius:5px;
+ filter:none!important;
+}
+.navemoji{width:33px;display:flex;align-items:center;justify-content:center}
+.navlink .ef-approved-icon{width:30px!important;height:30px!important}
+.ef-action .ef-approved-icon{width:48px!important;height:48px!important}
+.bottomnav .ef-approved-icon{width:29px!important;height:29px!important}
+.bottomnav a b{width:47px;height:37px}
+.circle .ef-approved-icon{width:34px!important;height:34px!important}
+.training .symbol .ef-approved-icon{width:39px!important;height:39px!important}
+.quick-bell .ef-approved-icon{width:29px!important;height:29px!important}
+.ef-live-clock .ef-approved-icon{width:25px!important;height:25px!important}
+.ef-section-top .ef-approved-icon{width:27px!important;height:27px!important}
+.menu-trigger .ef-approved-icon{width:28px!important;height:28px!important}
+.waterdots .ef-approved-icon{width:27px!important;height:27px!important}
+.exercise-no-photo .ef-approved-icon{width:33px!important;height:33px!important}
+@media(max-width:420px){
+ .ef-action .ef-approved-icon{width:42px!important;height:42px!important}
+ .bottomnav .ef-approved-icon{width:28px!important;height:28px!important}
+ .navlink .ef-approved-icon{width:29px!important;height:29px!important}
+}

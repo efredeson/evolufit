@@ -324,3 +324,11 @@ option{background:#0d1b10;color:#fff}
  .main .pageheading .btn{min-height:35px}
  .ef-timer-card .clock{font-size:clamp(1.85rem,9vw,2.5rem)}
 }
+
+/* Mobile: mostra apenas os atalhos e dois resumos, evitando excesso visual. */
+@media(max-width:760px){
+ .ef-today-stats{display:none}
+ .ef-summary-grid{margin-top:10px}
+ .ef-summary-grid .card{padding:17px}
+ .ef-section-top{margin:18px 0 11px}
+}

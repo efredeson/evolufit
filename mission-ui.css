@@ -224,3 +224,19 @@ h1,h2,.pageheading h1,.efm-display,.efm-heading{font-style:italic}
  .efm-action{min-height:90px}
 }
 @media(prefers-reduced-motion:reduce){.efm-action{transition:none}}
+
+/* Keep the visual reading order from the approved mobile mockup. */
+@media(max-width:760px){
+ .efm-dashboard{display:flex;flex-direction:column;gap:0}
+ .efm-core,.efm-rail,.efm-main-lower{display:contents}
+ .efm-hero{order:0}
+ .efm-mission{order:1}
+ .efm-actions{order:2;width:100%}
+ .efm-preview{order:3;margin-top:13px;width:100%}
+ .efm-progress,.efm-weekly,.efm-notifications{display:none}
+ .efm-sidebar-logo img{max-height:88px}
+ .efm-card{max-width:100%}
+}
+@media(min-width:761px){
+ .efm-rail{align-content:start}
+}

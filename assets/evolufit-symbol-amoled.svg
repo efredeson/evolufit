@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="EvoluFit símbolo original: gatinho esportista e eletrocardiograma">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d1ff3b"/><stop offset=".5" stop-color="#a9fa17"/><stop offset="1" stop-color="#4eae09"/></linearGradient><linearGradient id="s" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f7fff4"/><stop offset=".6" stop-color="#c9d7cb"/><stop offset="1" stop-color="#6c8273"/></linearGradient></defs>
+<path d="M256 23 423 83 487 238 425 427 256 490 86 427 25 238 89 83Z" fill="#000" stroke="url(#g)" stroke-width="22" stroke-linejoin="round"/>
+<path d="M256 43 405 98 465 239 406 408 256 466 104 407 48 239 105 98Z" fill="#060906" stroke="#305621" stroke-width="8"/>
+<path d="m132 224-14-116c51 8 85 32 109 65m56 0c23-34 58-57 110-65l-15 119" fill="#cbd6d0" stroke="#171f1b" stroke-width="21" stroke-linejoin="round"/>
+<path d="m147 174-9-39 48 38m140 0 47-37-9 41" fill="#ff8590"/>
+<path d="M105 235c4-99 71-140 150-140 96 0 154 58 153 148 0 83-71 150-152 150-84 0-151-63-151-158Z" fill="url(#s)" stroke="#1a2520" stroke-width="18"/>
+<path d="M134 218c30-38 69-36 101 5m45 0c29-39 70-41 104-5" stroke="#253b28" stroke-width="12" fill="none" stroke-linecap="round"/>
+<ellipse cx="185" cy="250" rx="29" ry="35" fill="#a9ff24" stroke="#153c12" stroke-width="6"/><ellipse cx="327" cy="250" rx="29" ry="35" fill="#a9ff24" stroke="#153c12" stroke-width="6"/><ellipse cx="190" cy="250" rx="12" ry="29" fill="#081109"/><ellipse cx="331" cy="250" rx="12" ry="29" fill="#081109"/><circle cx="182" cy="239" r="8" fill="#fff"/><circle cx="323" cy="239" r="8" fill="#fff"/>
+<path d="m233 290 23 19 23-19Z" fill="#f88293" stroke="#44242b" stroke-width="5"/><path d="M256 308c-5 25-24 28-39 20m39-20c5 25 24 28 39 20" stroke="#253026" stroke-width="7" fill="none" stroke-linecap="round"/>
+<path d="m156 296-62-13m65 30-62 15m255-32 62-13m-65 30 62 15" stroke="#243e2a" stroke-width="6" stroke-linecap="round"/>
+<path d="M104 197c25-91 104-142 183-136 57 3 96 26 117 64-62-4-101-15-170-1-63 12-91 45-130 73Z" fill="#101915" stroke="url(#g)" stroke-width="13"/>
+<path d="M103 197c78-24 162-40 298-46" fill="none" stroke="url(#g)" stroke-width="21" stroke-linecap="round"/>
+<path d="m245 94 12 11 11-17m-17 24 26-10" fill="none" stroke="url(#g)" stroke-width="9" stroke-linecap="round"/>
+<path d="M93 376h90l18-31 29 67 37-72 18 37h129" fill="none" stroke="#0b1708" stroke-width="31" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M93 376h90l18-31 29 67 37-72 18 37h129" fill="none" stroke="url(#g)" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="91" cy="376" r="12" fill="#c9ff3b"/><circle cx="415" cy="376" r="12" fill="#c9ff3b"/>
+</svg>

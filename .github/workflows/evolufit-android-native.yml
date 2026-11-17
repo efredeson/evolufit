@@ -70,15 +70,15 @@ jobs:
         run: |
           set -euo pipefail
           FILE="android-native/app/build/outputs/apk/debug/app-debug.apk"
-          cp "$FILE" android-native/EvoluFit-Nativo-Android-TESTE.apk
-          TAG="evolufit-android-teste-v0.1"
+          cp "$FILE" android-native/EvoluFit-Android-Nativo-v0.2-Beta.apk
+          TAG="evolufit-android-nativo-v0.2-beta"
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$TAG" android-native/EvoluFit-Nativo-Android-TESTE.apk --clobber --repo "$GITHUB_REPOSITORY"
+            gh release upload "$TAG" android-native/EvoluFit-Android-Nativo-v0.2-Beta.apk --clobber --repo "$GITHUB_REPOSITORY"
           else
-            gh release create "$TAG" android-native/EvoluFit-Nativo-Android-TESTE.apk \
+            gh release create "$TAG" android-native/EvoluFit-Android-Nativo-v0.2-Beta.apk \
               --repo "$GITHUB_REPOSITORY" \
-              --title "EvoluFit Android Nativo — APK de teste" \
-              --notes "Versão experimental Android nativa, sem WebView. Baixe o arquivo .apk abaixo e instale pelo gerenciador de arquivos do Android. APK assinado com chave de debug; as próximas versões podem precisar desinstalar esta versão antes de instalar." \
+              --title "EvoluFit Android Nativo Beta 0.2 — Missões e Rotina" \
+              --notes "Aplicativo Android nativo (sem WebView), interface EvoluFit AMOLED, missão do dia selecionável, treinos guiados com descanso, registro real de tempo, histórico de caminhadas e peso, fotos privadas, lembretes locais e exportação JSON. Beta instalado separadamente da v0.1. APK assinado para testes com chave de debug." \
               --prerelease \
               --target "$GITHUB_SHA"
           fi

@@ -4,7 +4,7 @@ const KEY="evolufit-data-v01";
 const NAV=[
  ["inicio","Início","🏡"],["treinos","Treinos","🏋️"],["caminhadas","Caminhadas","🚶"],
  ["alimentacao","Alimentação","🥗"],["evolucao","Evolução","📈"],["fotos","Fotos","📷"],
- ["cronometro","Cronômetro","⏱️"],["ajustes","Ajustes","⚙️"]
+ ["cronometro","Cronômetro","⏱️"],["ajustes","Ajustes","⚙️"],["notificacoes","Notificações","🔔"]
 ];
 const PLANS=[
  {id:"inicio",title:"Comece no seu ritmo",level:"Iniciante",time:12,emoji:"🌱",desc:"Movimentos leves, sem equipamentos.",steps:["Marcha parada • 2 minutos","Sentar e levantar de cadeira firme • 8 vezes","Elevação de braços • 10 vezes","Passos laterais • 1 minuto","Alongamento leve • 2 minutos"]},
@@ -67,6 +67,7 @@ const UI_ICONS = {
  cronometro:'<circle cx="12" cy="13" r="8"/><path d="M12 13V8m0 5 3 2M9 2h6M19 5l2 2"/>',
  ajustes:'<circle cx="12" cy="8" r="3"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>',
  menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+ notificacoes:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 9h18c0-1-3-2-3-9ZM10 21h4"/>',
  bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 9h18c0-1-3-2-3-9ZM10 21h4"/>',
  calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v5M17 3v5M3 11h18"/>',
  check:'<path d="m4 12 5 5L20 6"/>',
@@ -88,7 +89,7 @@ function nav(){
  '<div class="ef-user-header"><button class="menu-trigger" type="button" data-action="toggle-menu" aria-label="Abrir menu">'+uiIcon("menu")+'</button>'+
  '<a class="mini-logo" href="#inicio">Evolu<em>Fit</em></a>'+
  '<div class="top-welcome"><strong>Olá, '+name+'! 👋</strong><small>Seu progresso, no seu ritmo.</small></div></div>'+
- '<div class="top-actions"><a class="quick-bell" href="#alimentacao" aria-label="Lembretes das refeições" title="Lembretes das refeições">'+uiIcon("bell")+'</a>'+
+ '<div class="top-actions"><a class="quick-bell" href="#notificacoes" aria-label="Central de lembretes" title="Central de lembretes">'+uiIcon("bell")+'</a>'+
  '<a class="avatar" href="#ajustes" aria-label="Meu perfil">'+es((data.profile?.name||"E")[0].toUpperCase())+'</a></div>';
  $('#bottomnav').innerHTML=[NAV[0],NAV[1],NAV[4],NAV[7]].map(n=>
  '<a href="#'+n[0]+'" class="'+(view===n[0]?'active':'')+'"><b>'+uiIcon(n[0])+'</b><span>'+(n[0]==='ajustes'?'Perfil':n[1])+'</span></a>'
@@ -100,7 +101,7 @@ function nav(){
 function render(){
  if(!NAV.find(n=>n[0]===view))view="inicio";
  nav();
- const views={inicio:home,treinos:trainings,caminhadas:walks,alimentacao:food,evolucao:evolution,fotos:photos,cronometro:timer,ajustes:settings};
+ const views={inicio:home,treinos:trainings,caminhadas:walks,alimentacao:food,evolucao:evolution,fotos:photos,cronometro:timer,ajustes:settings,notificacoes:notificationsPage};
  $("#main").innerHTML='<div class="animated">'+views[view]()+'</div>';
  if(view==="fotos")loadPhotos();
  if(view==="cronometro")drawClock();
@@ -232,6 +233,24 @@ function timer(){
  '<p class="footnote">O cronômetro funciona enquanto a página estiver ativa. O celular pode suspender a contagem quando o aplicativo está em segundo plano.</p></section>';
 }
 
+function notificationsPage(){
+ const available=("Notification" in window);
+ const permission=available?Notification.permission:"unsupported";
+ const enabled=Boolean(data.notifications&&permission==="granted");
+ const meals=[...data.meals].sort((a,b)=>a.time.localeCompare(b.time));
+ const list=meals.map(m=>'<div class="listitem"><span class="circle">'+uiIcon("clock")+'</span>'+
+ '<div class="grow"><strong>'+es(m.name)+'</strong><small>'+es(m.time)+' · '+(enabled?'Lembrete ativo':'Lembrete desativado')+'</small></div></div>').join("");
+ return title("Notificações","Organize os lembretes dos horários das refeições.","MEUS LEMBRETES")+
+ '<div class="grid two"><section class="card"><div class="cardhead"><h2>Avisos no navegador</h2>'+
+ '<span class="pill">'+(enabled?'Ativados':'Desativados')+'</span></div>'+
+ '<p>Receba avisos dos horários programados enquanto o EvoluFit estiver aberto.</p>'+
+ action("notify-toggle",enabled?"Desativar lembretes":"Ativar lembretes",enabled?"btn secondary":"btn")+
+ '<p class="footnote">'+(permission==="denied"?"Permissão bloqueada no navegador: altere nas configurações do site.":'O aplicativo ainda não envia alertas quando está fechado. Sem notificações em segundo plano nesta versão.')+'</p></section>'+
+ '<section class="card"><div class="cardhead"><h2>Próximas refeições</h2><a class="ef-chip" href="#alimentacao">Editar horários ›</a></div>'+
+ (list||empty("Nenhum horário","Adicione horários em Alimentação.","🔔"))+
+ '</section></div>';
+}
+
 function settings(){
  const cloud=!!window.EvoluCloud?.active;
  return title("Configurações","Personalize seu perfil e cuide dos seus registros.","MEU EVOLUFIT")+'<div class="grid two"><section class="card"><h2>Meu perfil</h2><form data-form="profile" class="formgrid"><div class="field full"><label>Nome ou apelido</label><input name="name" maxlength="60" value="'+es(data.profile.name)+'"></div><div class="field"><label>Altura (cm)</label><input type="number" name="height" min="80" max="240" value="'+es(data.profile.height)+'" placeholder="Ex: 170"></div><div class="field"><label>Peso-meta opcional (kg)</label><input type="number" name="goal" min="10" max="500" step="0.1" value="'+es(data.profile.goal)+'" placeholder="Ex: 70"></div><div class="field full"><button class="btn">Salvar perfil</button></div></form><p class="footnote">Metas pessoais podem ser de manutenção ou evolução de hábitos; emagrecer não é obrigatório.</p></section><section class="card"><h2>Privacidade & dados</h2><p>'+(cloud?'Registros e fotos sincronizados com sua conta privada no Supabase. Não compartilhe sua senha. Alterações simultâneas em vários dispositivos podem sobrescrever registros.':'Dados de peso, treinos, alimentação e caminhadas ficam no localStorage deste navegador. Fotos ficam no IndexedDB. Não existe conta nem sincronização entre dispositivos.')+'</p><div style="display:flex;gap:8px;flex-wrap:wrap">'+action("export","⬇ Exportar registros","btn secondary")+action("clear","🗑 Apagar dados","btn danger")+'</div><p class="footnote">A exportação JSON não inclui fotos. Limpar os dados do navegador pode apagar o histórico.</p></section></div><div class="notice" style="margin-top:20px">'+(cloud?'EvoluFit v0.2: seus registros estão vinculados à sua conta. Alarmes ainda dependem do navegador aberto.':'Versão de demonstração EvoluFit v0.1. Novos recursos virão após testes de segurança, acessibilidade e privacidade.')+'</div>';
@@ -313,6 +332,14 @@ document.addEventListener("click",async e=>{
  const act=b.dataset.action,idv=b.dataset.id; if(act==="meal-check")return;
  if(act==="toggle-menu"){document.body.classList.toggle("menu-open");return;}
  if(act==="close-menu"){document.body.classList.remove("menu-open");return;}
+ if(act==="notify-toggle"){
+  if(data.notifications){data.notifications=false;save();render();toast("Lembretes desativados.");return;}
+  if(!("Notification" in window)){toast("Seu navegador não oferece esse recurso.");return;}
+  const permission=await Notification.requestPermission();
+  data.notifications=(permission==="granted");save();render();
+  toast(data.notifications?"Lembretes ativados enquanto o site estiver aberto.":"Permissão não concedida.");
+  return;
+ }
  if(act==="goto"){location.hash=b.dataset.target;return;}
  if(act==="open-training"){const p=PLANS.find(p=>p.id===b.dataset.plan);if(p)modalTraining(p);return;}
  if(act==="finish-plan"){const p=PLANS.find(p=>p.id===b.dataset.plan);if(!p)return;

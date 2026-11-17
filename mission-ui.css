@@ -240,3 +240,34 @@ h1,h2,.pageheading h1,.efm-display,.efm-heading{font-style:italic}
 @media(min-width:761px){
  .efm-rail{align-content:start}
 }
+
+/* The approved welcome screen in the account-enabled beta. */
+.efm-auth-splash{
+ width:min(460px,100%);min-height:min(780px,calc(100dvh - 26px));
+ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+ color:#f6fff0;text-align:center;padding:30px 25px;position:relative;overflow:hidden;
+ border:1px solid #75c51e;border-radius:34px;
+ background:radial-gradient(circle at 50% 29%,#1a450e 0,transparent 49%),linear-gradient(155deg,#050d04,#000 73%);
+ box-shadow:0 0 24px #8bfa1740,inset 0 0 60px #7bd21c12
+}
+.efm-auth-splash:before{content:"";position:absolute;inset:10px;border:1px solid #5b982c44;border-radius:27px;pointer-events:none}
+.efm-auth-splash:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(140deg,transparent 28%,#aaff0f10 30%,transparent 32%,transparent 74%,#aaff0f18 76%,transparent 79%)}
+.efm-auth-splash>*{z-index:1;position:relative}
+.efm-splash-mark{width: min(88%,300px);margin:0 auto}
+.efm-splash-mark img{width:100%;height:auto;max-height:310px;object-fit:contain;filter:drop-shadow(0 0 30px #7fff2566)}
+.efm-splash-wordmark{font-family:"Barlow Condensed","Oxanium",sans-serif;font-weight:900;font-style:italic;letter-spacing:-2px;font-size:clamp(52px,15vw,89px);line-height:.93;color:#f5fff5;text-shadow:0 4px 1px #10150a,0 0 20px #aaff1a4d}
+.efm-splash-wordmark span{color:#b7ff17}
+.efm-splash-slogan{font-family:"Barlow Condensed",sans-serif;font-size:clamp(20px,5vw,28px);font-weight:800;font-style:italic;color:#eaffdc;margin:5px 0}
+.efm-splash-heart{font-size:18px;color:#caff30;letter-spacing:4px;margin:9px 0 13px}
+.efm-splash-actions{display:grid;width:100%;gap:11px}
+.efm-splash-actions button{min-height:54px;font-family:"Barlow Condensed",sans-serif;font-weight:900;font-size:24px;font-style:italic;border-radius:13px}
+.efm-splash-register{background:#060c05;color:#eaffd9;border:1px solid #9be12e;box-shadow:inset 0 0 10px #3b6d1222}
+.efm-splash-register:hover{background:#12240a;box-shadow:0 0 15px #baff1638}
+.efm-splash-footnote{font-size:13px;color:#9abb9a;font-weight:650;margin-top:15px}
+@media(max-width:760px){
+ #auth-root{padding:0}
+ .efm-auth-splash{border-radius:0;min-height:100dvh;border:0;padding:25px 28px}
+ .efm-auth-splash:before{border-radius:18px}
+ .efm-splash-mark{width:min(68vw,260px)}
+ .efm-splash-wordmark{font-size:clamp(60px,16vw,88px)}
+}

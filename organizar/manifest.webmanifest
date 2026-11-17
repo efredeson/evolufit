@@ -1,0 +1,25 @@
+{
+  "name": "EvoluFit — Prévia de Testes",
+  "short_name": "EvoluFit Teste",
+  "description": "Prévia para testar a organização interna do EvoluFit no Android, sem afetar a versão principal.",
+  "id": "./",
+  "start_url": "./#inicio",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "../assets/evolufit-symbol-amoled.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "../assets/evolufit-gatinho-hd.webp",
+      "sizes": "1254x1254",
+      "type": "image/webp",
+      "purpose": "any"
+    }
+  ]
+}

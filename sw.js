@@ -1,5 +1,5 @@
-const CACHE="evolufit-root-v10-approved-art-icons";
-const ASSETS=["./","./index.html","./styles.css","./theme-neon.css","./app.js","./manifest.webmanifest","./assets/evolufit-gatinho-hd.webp","./assets/evolufit-marca-hd.webp","./assets/exercicios/marcha-foto.webp","./assets/exercicios/cadeira-foto.webp","./assets/exercicios/bracos-foto.webp","./assets/exercicios/lateral-foto.webp","./assets/exercicios/agachamento-foto.webp","./assets/exercicios/parede-foto.webp","./assets/exercicios/prancha-foto.webp","./assets/exercicios/alongamento-foto.webp","./ef-icons.js","./assets/evolufit-symbol-amoled.svg","./assets/ef-icons-approved.svg"];
+const CACHE="evolufit-root-v11-icon-revert";
+const ASSETS=["./","./index.html","./styles.css","./theme-neon.css","./app.js","./manifest.webmanifest","./assets/evolufit-gatinho-hd.webp","./assets/evolufit-marca-hd.webp","./assets/exercicios/marcha-foto.webp","./assets/exercicios/cadeira-foto.webp","./assets/exercicios/bracos-foto.webp","./assets/exercicios/lateral-foto.webp","./assets/exercicios/agachamento-foto.webp","./assets/exercicios/parede-foto.webp","./assets/exercicios/prancha-foto.webp","./assets/exercicios/alongamento-foto.webp","./ef-icons.js","./assets/evolufit-symbol-amoled.svg"];
 self.addEventListener("install",e=>{
  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });

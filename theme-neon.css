@@ -368,7 +368,7 @@ body, .shell,.bodyarea,.main{
 .modal{background:rgba(0,0,0,.88)}
 .dialog{background:linear-gradient(150deg,#0c120d,#000)!important}
 .ef-brand-icon{display:inline-block;vertical-align:middle;filter:drop-shadow(0 0 4px #baff182e);flex-shrink:0}
-.ef-brand-icon path,.ef-brand-icon circle,.ef-brand-icon rect{vector-effect:non-scaling-stroke}
+.ef-brand-icon path,.ef-brand-icon circle,.ef-brand-icon rect{vector-effect:none}
 .ef-icon-fallback{color:#b8ff38}
 .circle:has(.ef-brand-icon){font-size:0;display:grid;place-items:center}
 .training .symbol:has(.ef-brand-icon){display:grid;place-items:center;width:39px;height:39px}

@@ -242,3 +242,85 @@ option{background:#0d1b10;color:#fff}
  .training .plan-preview{height:169px}
 }
 @media(prefers-reduced-motion:reduce){.sidebar{transition:none}}
+
+/* Seções secundárias seguem o mesmo layout da referência, sem conteúdo fictício */
+.main .pageheading{
+ padding:24px 25px;min-height:144px;position:relative;isolation:isolate;overflow:hidden;
+ border:1px solid #5b9b24;border-radius:20px;
+ background:radial-gradient(ellipse at 74% 36%,#3f96271d,transparent 53%),linear-gradient(120deg,#153318,#09140d 67%);
+ box-shadow:0 0 0 1px #83c9271a,0 10px 26px #0007
+}
+.main .pageheading:after{
+ content:"";position:absolute;right:2%;bottom:-26px;width:220px;height:180px;pointer-events:none;z-index:-1;
+ background:url("assets/evolufit-gatinho-hd.webp?v=5") center bottom / contain no-repeat;
+ opacity:.4;filter:drop-shadow(0 10px 15px #0008)
+}
+.main .pageheading>div{position:relative;z-index:2;max-width:calc(100% - 170px)}
+.main .pageheading h1{font-weight:920;font-size:clamp(1.75rem,3vw,2.4rem)}
+.main .pageheading p{color:#c1d8c5;line-height:1.45}
+.main .pageheading>.btn{z-index:2;position:relative;flex-shrink:0}
+.quick-bell{
+ height:39px;width:39px;display:flex;align-items:center;justify-content:center;
+ border:1px solid #426a35;border-radius:50%;background:#142519;color:#baff39;
+}
+.quick-bell:hover{border-color:var(--neon);background:#233a1a}
+.ef-section-top .ui-icon{color:#b9ff41}
+.ef-today-stats .card{padding:17px}
+.ef-today-stats .statnum{font-size:1.7rem;margin-top:11px}
+.ef-today-stats .hint{font-size:11px}
+.ef-timer-card{border-color:#5e9528}
+.ef-live-clock{
+ display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:22px;
+ color:#b7d9ad;font-size:13px
+}
+.ef-live-clock .ui-icon{color:#affd35}
+.ef-live-clock strong{font-size:14px;letter-spacing:.8px;color:#fff}
+.ef-timer-card .clock{
+ margin:22px auto;max-width:500px;padding:26px 12px;letter-spacing:-2px;
+ border-radius:100px;background:radial-gradient(circle,#142b18 20%,#06110b 72%);
+ border:2px solid #76be22;box-shadow:0 0 25px #b2fb283b,inset 0 0 35px #6cbd1b22;
+ font-size:clamp(2.4rem,6vw,4.3rem)
+}
+/* Área privada beta: tela de login gamer coerente com o restante do app */
+#auth-root{
+ background:radial-gradient(circle at 17% 24%,#376b1b36,transparent 39%),
+ radial-gradient(circle at 87% 76%,#4f9e172a,transparent 32%),#060b08;color:#f5fff2
+}
+.cloud-auth-panel{
+ background:linear-gradient(145deg,#132319,#080f0b);
+ border:1px solid #7eae2a;border-radius:23px;
+ box-shadow:0 18px 58px #000c,0 0 22px #83c51923;color:#f4fff4
+}
+.cloud-auth-panel h1{color:#f5fff3;font-weight:920}
+.cloud-subtitle,.cloud-slogan{color:#b0c7b2}
+.cloud-privacy{color:#91aa96}
+.cloud-auth-form label{color:#d7f1d2}
+.cloud-auth-form input{background:#0a150e;border-color:#43603e;color:#f7fff2}
+.cloud-auth-form input::placeholder{color:#819482}
+.cloud-auth-form input:focus{border-color:#a7ff22;box-shadow:0 0 0 3px #93e31a2d}
+.cloud-primary{background:linear-gradient(#caff2e,#8cdb00);color:#13220b;border:1px solid #baff3d;border-radius:12px;font-weight:900}
+.cloud-primary:hover{background:linear-gradient(#e0ff79,#acff26)}
+.cloud-auth-links button{color:#b9fd48}
+#auth-message[data-kind="success"]{color:#c0ff6f}
+#auth-message[data-kind="error"]{color:#ff9a9a}
+.cloud-account{color:#c0f25c;background:#18321a;border-color:#5a8532}
+.cloud-account:hover{background:#254c24}
+.cloud-loading{color:#daffd4}
+@media(max-width:760px){
+ .main .pageheading{padding:21px 18px;min-height:130px;margin-bottom:16px;border-radius:17px}
+ .main .pageheading>div{max-width:78%}
+ .main .pageheading:after{right:-25px;width:170px;height:152px;opacity:.28}
+ .main .pageheading h1{font-size:1.7rem}
+ .main .pageheading p{font-size:12px}
+ .main .pageheading>.btn{font-size:12px;padding:9px 11px}
+ .quick-bell{height:36px;width:36px}
+ .ef-today-stats .statnum{font-size:1.5rem}
+ .ef-timer-card .clock{font-size:2.2rem;padding:24px 11px}
+ .ef-newhero img{max-width:48%}
+}
+@media(max-width:420px){
+ .main .pageheading>div{max-width:81%}
+ .main .pageheading:after{opacity:.19;right:-37px}
+ .main .pageheading .btn{min-height:35px}
+ .ef-timer-card .clock{font-size:clamp(1.85rem,9vw,2.5rem)}
+}

@@ -65,6 +65,7 @@
     mode = newMode;
     show();
     root.innerHTML = formMarkup();
+    root.scrollTop = 0; // Trocas de tela não herdam a rolagem do formulário anterior.
     root.querySelectorAll("[data-auth-mode]").forEach(button => {
       button.addEventListener("click", () => showForm(button.dataset.authMode));
     });

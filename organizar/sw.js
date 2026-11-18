@@ -1,6 +1,6 @@
 /* EvoluFit TESTE - prévia independente do aplicativo principal.
    Guarda somente arquivos públicos; não armazena nem envia dados pessoais. */
-const CACHE="evolufit-organizar-pwa-v1";
+const CACHE="evolufit-organizar-pwa-v2-vercel";
 const ASSETS=[
  "./","./index.html","./manifest.webmanifest","./app.js","./organize-ui.js","./organize-ui.css",
  "../ef-icons.js","../mission-ui.js","../mission-ui.css","../styles.css","../theme-neon.css",
@@ -21,7 +21,7 @@ self.addEventListener("activate",event=>{
 });
 self.addEventListener("fetch",event=>{
  const request=event.request;if(request.method!=="GET")return;
- const url=new URL(request.url);if(url.origin!==self.location.origin||!url.pathname.startsWith("/evolufit/"))return;
+ const url=new URL(request.url);const siteRoot=new URL(self.registration.scope).pathname.replace(/organizar\/$/,"");if(url.origin!==self.location.origin||!url.pathname.startsWith(siteRoot))return;
  const fresh=request.mode==="navigate"||/\.(?:html|js|css|webmanifest)$/.test(url.pathname);
  if(fresh){
   event.respondWith(fetch(request).then(response=>{

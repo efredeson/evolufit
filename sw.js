@@ -1,5 +1,5 @@
-const CACHE="evolufit-root-v13-approved-ui";
-const ASSETS=["./","./index.html","./styles.css","./theme-neon.css","./app.js","./manifest.webmanifest","./assets/evolufit-gatinho-hd.webp","./assets/evolufit-marca-hd.webp","./assets/exercicios/marcha-foto.webp","./assets/exercicios/cadeira-foto.webp","./assets/exercicios/bracos-foto.webp","./assets/exercicios/lateral-foto.webp","./assets/exercicios/agachamento-foto.webp","./assets/exercicios/parede-foto.webp","./assets/exercicios/prancha-foto.webp","./assets/exercicios/alongamento-foto.webp","./ef-icons.js","./assets/evolufit-symbol-amoled.svg","./mission-ui.js","./mission-ui.css"];
+const CACHE="evolufit-root-v15-vercel-migration";
+const ASSETS=["./","./index.html","./styles.css","./theme-neon.css","./app.js","./manifest.webmanifest","./migration-helper.js","./assets/evolufit-gatinho-hd.webp","./assets/evolufit-marca-hd.webp","./assets/exercicios/marcha-foto.webp","./assets/exercicios/cadeira-foto.webp","./assets/exercicios/bracos-foto.webp","./assets/exercicios/lateral-foto.webp","./assets/exercicios/agachamento-foto.webp","./assets/exercicios/parede-foto.webp","./assets/exercicios/prancha-foto.webp","./assets/exercicios/alongamento-foto.webp","./ef-icons.js","./assets/evolufit-symbol-amoled.svg","./mission-ui.js","./mission-ui.css"];
 self.addEventListener("install",e=>{
  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
@@ -9,7 +9,10 @@ self.addEventListener("activate",e=>{
 self.addEventListener("fetch",e=>{
  if(e.request.method!=="GET")return;
  const u=new URL(e.request.url);
- if(u.origin!==location.origin||!u.pathname.includes("/evolufit/"))return;
+ const scopePath=new URL(self.registration.scope).pathname;
+ if(u.origin!==self.location.origin||!u.pathname.startsWith(scopePath))return;
+ // Let Beta and organization previews manage their own caches.
+ if(u.pathname.startsWith(scopePath+"beta/")||u.pathname.startsWith(scopePath+"organizar/"))return;
  const networkFirst=e.request.mode==="navigate"||/\.(?:html|js|css|webmanifest)$/.test(u.pathname);
  if(networkFirst){
   e.respondWith(fetch(e.request).then(response=>{

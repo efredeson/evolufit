@@ -48,7 +48,7 @@
   </script>
   <script>
     if ("serviceWorker" in navigator && location.protocol === "https:") {
-      navigator.serviceWorker.register("organizar/sw.js", {scope:"/evolufit/organizar/"}).catch(()=>{});
+      navigator.serviceWorker.register("organizar/sw.js").catch(()=>{});
     }
   </script>
 </body>

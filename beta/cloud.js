@@ -23,8 +23,8 @@
     if (node) { node.textContent = message; node.dataset.kind = kind; }
   };
   // The root URL is currently allow-listed in the Supabase dashboard.
-  // After email confirmation return to /evolufit/beta/ to sign in.
-  const redirect = () => window.location.origin + "/evolufit/";
+  // Return to the currently deployed Beta path (GitHub Pages or Vercel).
+  const redirect = () => new URL("./", window.location.href).href;
   const show = () => {
     root.hidden = false;
     document.documentElement.classList.add("cloud-pending");

@@ -47,13 +47,13 @@
     const recovery = mode === "recover";
     const update = mode === "update";
     const signup = mode === "signup";
-    return '<div class="cloud-auth-panel"><img class="cloud-cat" src="../assets/evolufit-marca-hd.webp?v=5" alt="Mascote EvoluFit">' +
+    return '<div class="cloud-auth-panel"><div class="efp-login-brand">Evolu<span>Fit</span></div><img class="cloud-cat" src="../assets/evolufit-gatinho-hd.webp?v=5" alt="Mascote EvoluFit">' +
       '<p class="cloud-slogan">Sua evolução é a missão.</p>' +
-      '<h1>' + (recovery?"Recuperar senha":update?"Nova senha":signup?"Criar minha conta":"Entrar no EvoluFit") + '</h1>' +
-      '<p class="cloud-subtitle">Treinos em casa, caminhadas e seus hábitos em um espaço privado.</p>' +
+      '<h1>' + (recovery?"Recuperar senha":update?"Nova senha":signup?"Criar minha conta":"Entre na sua conta") + '</h1>' +
+      '<p class="cloud-subtitle">Acesse seu espaço e continue sua evolução.</p>' +
       '<form id="auth-form" class="cloud-auth-form">' +
       (!update ? '<label for="auth-email">E-mail</label><input id="auth-email" name="email" type="email" autocomplete="email" required maxlength="180" placeholder="voce@exemplo.com">' : '') +
-      (!recovery ? '<label for="auth-password">Senha</label><input id="auth-password" name="password" type="password" autocomplete="' + (update?"new-password":signup?"new-password":"current-password") + '" minlength="8" maxlength="128" required placeholder="Mínimo de 8 caracteres">' : '') +
+      (!recovery ? '<label for="auth-password">Senha</label><div class="efp-password-field"><input id="auth-password" name="password" type="password" autocomplete="' + (update?"new-password":signup?"new-password":"current-password") + '" minlength="8" maxlength="128" required placeholder="Mínimo de 8 caracteres"><button type="button" data-action="efp-password" aria-label="Mostrar senha">◉</button></div>' : '') +
       '<button class="cloud-primary" type="submit">' + (recovery?"Enviar link":update?"Alterar senha":signup?"Criar conta":"Entrar") + '</button></form>' +
       '<div id="auth-message" role="status" aria-live="polite"></div>' +
       '<div class="cloud-auth-links">' +
@@ -65,7 +65,7 @@
     mode = newMode;
     show();
     root.innerHTML = formMarkup();
-    root.scrollTop = 0; // Trocas de tela não herdam a rolagem do formulário anterior.
+    root.scrollTop = 0;
     root.querySelectorAll("[data-auth-mode]").forEach(button => {
       button.addEventListener("click", () => showForm(button.dataset.authMode));
     });
@@ -155,7 +155,7 @@
     pending = null;
     clearTimeout(saveTimer);
     app.setData(app.defaultData());
-    showWelcome();
+    showForm("login");
   }
   function decorateNav() {
     if (!api.active) return;

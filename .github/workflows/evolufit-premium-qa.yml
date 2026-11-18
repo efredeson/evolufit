@@ -1,0 +1,28 @@
+name: EvoluFit Premium - QA visual
+on:
+  push:
+    branches: [design/evolufit-premium-web-2026]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar navegador de testes
+        run: |
+          npm install --no-save playwright@1.57.0
+          which google-chrome || which google-chrome-stable || which chromium
+      - name: Validar nove telas e estabilidade mobile
+        run: node .github/scripts/premium-qa.cjs
+      - name: Guardar capturas e diagnóstico
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evolufit-premium-qa
+          path: premium-qa-results/
+          retention-days: 3

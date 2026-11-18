@@ -20,7 +20,7 @@
  '<div class="eforg-fold-inside">'+content+'</div></details>';
  const hint=(body)=>'<p class="eforg-hint">'+body+'</p>';
  function organizedTraining(){
-  const featured=PLANS[0];
+  const featured=window.EvoluWorkouts?.getRecommended?.()||PLANS[0];
   const cards=PLANS.map((p,idx)=>{
    const image=planPicture(p);
    return '<article class="eforg-plan">'+
@@ -37,7 +37,7 @@
    '<p>'+es(featured.desc)+'</p><div class="eforg-feature-chips"><span>'+featured.time+' minutos</span><span>'+featured.steps.length+' exercícios</span><span>'+featured.level+'</span></div>'+
    '<button class="btn eforg-primary" data-action="efm-start" data-plan="'+featured.id+'">▶ Começar missão</button></div>'+
    '<img src="'+planPicture(featured)+'" alt="Exemplo de exercício para iniciantes"></div>'+
-   intro("Escolha seu treino","Quatro opções, sem complicação.")+
+   intro("Escolha seu treino","Nove programas em casa: iniciante, intermediário e avançado.")+
    '<div class="eforg-plan-grid">'+cards+'</div>'+
    summaryDetails("Treinos concluídos","Veja suas últimas atividades",history,"evolucao")+
    hint("Imagens geradas para demonstração. Respeite seus limites; interrompa se houver dor ou tontura.")+'</div>';

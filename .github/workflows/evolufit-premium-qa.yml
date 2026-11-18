@@ -16,7 +16,7 @@ jobs:
       - name: Instalar navegador de testes
         run: |
           npm install --no-save playwright@1.57.0
-          npx playwright install --with-deps chromium
+          which google-chrome || which google-chrome-stable || which chromium
       - name: Validar nove telas e estabilidade mobile
         run: node .github/scripts/premium-qa.cjs
       - name: Guardar capturas e diagnóstico

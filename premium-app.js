@@ -3,10 +3,10 @@
    passos, calorias ou conquistas: tudo vem dos registros já existentes. */
 (() => {
  'use strict';
- const P={level:'all',goal:'all',photoUrls:[]};
+ const P={level:window.EvoluWorkouts?.getPreferredLevel?.()||'Iniciante',goal:'all',photoUrls:[]};
  const ROOT=location.pathname.includes('/beta/')?'../':'';
  const img=(name)=>ROOT+'assets/'+name;
- const workoutImage={inicio:'cadeira',corpo:'agachamento',mob:'alongamento',energia:'marcha'};
+ const workoutImage={inicio:'agachamento-capa-premium',cardioleve:'marcha',mob:'alongamento',corpo:'agachamento',energia:'marcha',estabilidade:'prancha','forca-avancada':'agachamento','cardio-avancado':'marcha','controle-avancado':'prancha'};
  const ico=(name,n=23)=>uiIcon(name,n);
  const clean=t=>es(t);
  const count=(n)=>Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:1});
@@ -40,16 +40,16 @@
  }
  function premiumHome(){
   const habits=dailyHabits(),complete=habits.filter(Boolean).length,pct=complete*25;
-  const plan=PLANS[0],water=waterCount(),done=todayMeals().length,walks=todayWalks(),walkDistance=walks.reduce((s,w)=>s+Number(w.distance||0),0);
+  const plan=window.EvoluWorkouts?.getRecommended?.()||PLANS[0],water=waterCount(),done=todayMeals().length,walks=todayWalks(),walkDistance=walks.reduce((s,w)=>s+Number(w.distance||0),0);
   const displayGreeting=greeting()+(firstName()?', '+firstName():'');
   const legacy=location.hostname==='efredeson.github.io'?
    '<aside class="efp-old-domain" role="note"><span>Você está no endereço antigo. Os dados locais ficam separados entre domínios.</span><a href="https://evolufit-lake.vercel.app/" target="_blank" rel="noopener noreferrer">Abrir na Vercel ›</a></aside>':'';
   return '<div class="efp-home">'+legacy+
   '<div class="efp-greeting"><div><h1>'+displayGreeting+'<span class="efp-green-dot">.</span></h1><p>Disciplina hoje, resultados amanhã.</p></div></div>'+ 
-  '<section class="efp-surface efp-home-hero"><div class="efp-hero-copy"><span class="efp-overline">RESUMO DO SEU DIA</span><h2>'+(complete?'Continue sua evolução.':'Um passo de cada vez.')+'</h2><p>'+(complete?'Você já concluiu '+complete+' de 4 hábitos hoje.':'Comece com um treino leve de '+plan.time+' minutos.')+'</p>'+primary('efm-start','▶ &nbsp; Começar treino','data-plan="inicio"')+'</div><div class="efp-hero-stats">'+ring(pct,'da rotina')+'<strong>'+complete+' de 4 hábitos</strong><span>concluídos hoje</span><div class="efp-hero-week">'+ico('meta',19)+' '+weekDays()+' de 7 dias ativos na semana</div></div></section>'+ 
+  '<section class="efp-surface efp-home-hero"><div class="efp-hero-copy"><span class="efp-overline">RESUMO DO SEU DIA</span><h2>'+(complete?'Continue sua evolução.':'Um passo de cada vez.')+'</h2><p>'+(complete?'Você já concluiu '+complete+' de 4 hábitos hoje.':'Explore um treino de '+plan.time+' minutos no nível '+plan.level.toLowerCase()+'.')+'</p>'+primary('efm-start','▶ &nbsp; Começar treino','data-plan="'+plan.id+'"')+'</div><div class="efp-hero-stats">'+ring(pct,'da rotina')+'<strong>'+complete+' de 4 hábitos</strong><span>concluídos hoje</span><div class="efp-hero-week">'+ico('meta',19)+' '+weekDays()+' de 7 dias ativos na semana</div></div></section>'+ 
   '<div class="efp-shortcuts">'+link('treinos','Treinos','Planos e exercícios')+link('caminhadas','Caminhadas','Registro e metas')+link('alimentacao','Alimentação','Refeições e água')+link('cronometro','Cronômetro','Seu tempo de treino')+'</div>'+
   sectionTitle('Treino recomendado',secLink('#treinos','Ver planos'))+
-  '<section class="efp-surface efp-feature-plan"><div class="efp-feature-image"><img src="'+img('exercicios/agachamento-capa-premium.webp')+'" loading="lazy" alt="Pessoa demonstrando agachamento adaptado em casa"></div><div class="efp-feature-copy"><span class="efp-tag">PARA COMEÇAR</span><h3>'+clean(plan.title)+'</h3><p>'+clean(plan.desc)+'</p><div class="efp-feature-chips"><span>'+ico('clock',17)+' '+plan.time+' min</span><span>'+ico('treinos',17)+' '+plan.steps.length+' exercícios</span><span>'+clean(plan.level)+'</span></div>'+primary('efm-start','▶ &nbsp; Iniciar treino','data-plan="inicio"')+'</div></section>'+
+  '<section class="efp-surface efp-feature-plan"><div class="efp-feature-image"><img src="'+img('exercicios/'+(workoutImage[plan.id]||'agachamento')+(workoutImage[plan.id]==='agachamento-capa-premium'?'.webp':'-foto.webp'))+'" loading="lazy" alt="Imagem demonstrativa do treino em casa"></div><div class="efp-feature-copy"><span class="efp-tag">SEU NÍVEL · '+clean(plan.level.toUpperCase())+'</span><h3>'+clean(plan.title)+'</h3><p>'+clean(plan.desc)+'</p><div class="efp-feature-chips"><span>'+ico('clock',17)+' '+plan.time+' min</span><span>'+ico('treinos',17)+' '+plan.steps.length+' exercícios</span><span>'+clean(plan.level)+'</span></div>'+primary('efm-start','▶ &nbsp; Iniciar treino','data-plan="'+plan.id+'"')+'</div></section>'+
   sectionTitle('Resumo do dia',secLink('#evolucao','Ver detalhes'))+
   '<div class="efp-stats-grid">'+[
     ['agua','Água',water+' copo(s)','registrados',water?Math.min(100,water/8*100):0],
@@ -59,16 +59,33 @@
   ].map(([icon,label,num,unit,progress])=>'<a href="#'+(label==='Água'?'alimentacao':label==='Semana'?'evolucao':label==='Refeições'?'alimentacao':'caminhadas')+'" class="efp-surface efp-stat"><span class="efp-stat-symbol">'+ico(icon,23)+'</span><span>'+label+'</span><strong>'+num+'</strong><small>'+unit+'</small><i class="efp-mini-progress"><i style="width:'+round(progress)+'%"></i></i></a>').join('')+'</div></div>';
  }
  function premiumTrainings(){
-  const levels=['all','Iniciante','Moderado','Leve','Ativo'];
-  const plans=PLANS.filter(p=>(P.level==='all'||p.level===P.level)&&(P.goal==='all'||(P.goal==='mob'&&p.id==='mob')||(P.goal==='energy'&&p.id==='energia')||(P.goal==='home'&&['inicio','corpo'].includes(p.id))));
-  const recommended=PLANS[0];const history=[...data.workouts].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
-  const cards=plans.map(p=>'<article class="efp-surface efp-train-row"><div class="efp-train-img">'+photo(workoutImage[p.id],p.title)+'</div><div class="efp-train-text"><h3>'+clean(p.title)+'</h3><p>'+clean(p.desc)+'</p><div class="efp-train-meta">'+p.time+' min · '+clean(p.level)+'</div></div><button type="button" class="efp-round-play" data-action="efm-start" data-plan="'+p.id+'" aria-label="Iniciar '+clean(p.title)+'">▶</button></article>').join('');
-  return '<div class="efp-page efp-train-page">'+heading('Treinos','Programas reais para você evoluir em casa.','treinos')+
-   '<div class="efp-filter-row"><label>Objetivo<select id="efp-goal"><option value="all" '+(P.goal==='all'?'selected':'')+'>Todos os objetivos</option><option value="home" '+(P.goal==='home'?'selected':'')+'>Condicionamento</option><option value="mob" '+(P.goal==='mob'?'selected':'')+'>Mobilidade</option><option value="energy" '+(P.goal==='energy'?'selected':'')+'>Mais energia</option></select></label><label>Nível<select id="efp-level">'+levels.map(l=>'<option value="'+l+'" '+(P.level===l?'selected':'')+'>'+(l==='all'?'Todos os níveis':l)+'</option>').join('')+'</select></label></div>'+
-   '<section class="efp-surface efp-training-feature"><div class="efp-training-photo">'+photo('parede','Exercício físico em casa')+'<span class="efp-photo-tag">TREINO RECOMENDADO</span></div><div class="efp-training-body"><h2>'+clean(recommended.title)+'</h2><p>'+clean(recommended.desc)+'</p><div class="efp-pills"><span>'+ico('clock',17)+' '+recommended.time+' min</span><span>'+ico('treinos',17)+' '+recommended.steps.length+' exercícios</span><span>'+clean(recommended.level)+'</span></div>'+primary('efm-start','▶ &nbsp; Iniciar treino','data-plan="'+recommended.id+'"')+'</div></section>'+
-   sectionTitle('Programas de treino','<span class="efp-text-muted">'+plans.length+' programas</span>')+
-   '<div class="efp-train-list">'+(cards||emptyUI('Sem treinos para este filtro','Selecione outro objetivo ou nível.'))+'</div>'+
-   sectionTitle('Seus treinos realizados')+'<section class="efp-surface efp-history">'+(history.map(w=>'<div class="efp-history-row"><span class="efp-history-icon">'+ico('check',22)+'</span><div><strong>'+clean(w.title)+'</strong><small>'+shortDate(w.date)+' · '+count(w.minutes)+' min</small></div></div>').join('')||emptyUI('Nenhum treino registrado','Complete uma missão para começar seu histórico.'))+'</section><p class="efp-help">Faça exercícios respeitando seus limites; interrompa se sentir dor, tontura ou falta de ar incomum.</p></div>';
+  const workout=window.EvoluWorkouts;
+  const levels=workout?.LEVELS||['Iniciante','Intermediário','Avançado'];
+  const level=levels.includes(P.level)?P.level:'Iniciante';
+  const levelPlans=PLANS.filter(p=>p.level===level);
+  const plans=levelPlans.filter(p=>P.goal==='all'||p.goal===P.goal);
+  const recommended=plans[0]||levelPlans[0]||PLANS[0];
+  const history=[...data.workouts].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  const descriptions={
+   Iniciante:'Para quem está começando ou retomando: técnica, confiança, sem saltos e pausas maiores.',
+   Intermediário:'Para quem já executa movimentos com controle: mais séries, força e resistência.',
+   'Avançado':'Para quem domina a técnica e tolera maior volume: desafios sem precisar de academia.'
+  };
+  const highlights={Iniciante:['2–3 dias de força','15–25 min por sessão','Descanso de 45–75 s'],Intermediário:['3 dias de força/semana','25–35 min por sessão','Descanso de 60–90 s'],'Avançado':['3–4 sessões/semana','30–45 min por sessão','Descanso de 60–90 s']};
+  const toCard=(plan)=>{
+   const kind=workoutImage[plan.id]||'agachamento';
+   const imagePath=kind==='agachamento-capa-premium'?img('exercicios/'+kind+'.webp'):img('exercicios/'+kind+'-foto.webp');
+   const drillList=(plan.drills||[]).map((d,i)=>'<li><div class="efp-drill-line"><b>'+clean(d.name)+'</b><span>'+clean(d.work)+'</span></div><p>'+clean(d.technique)+'</p><small><b>Mais fácil:</b> '+clean(d.easier)+'</small><small><b>Para progredir:</b> '+clean(d.harder)+'</small></li>').join('');
+   return '<article class="efp-surface efp-train-program"><div class="efp-train-header"><img src="'+imagePath+'" loading="lazy" alt="Ilustração de exercício para '+clean(plan.title)+'"><div class="efp-train-summary"><span class="efp-training-label">'+clean(plan.level)+' · '+clean(workout.GOALS[plan.goal]||'Treino em casa')+'</span><h3>'+clean(plan.title)+'</h3><p>'+clean(plan.desc)+'</p><div class="efp-training-chips"><span>'+ico('clock',16)+' '+plan.time+' min</span><span>'+ico('treinos',16)+' '+plan.steps.length+' exercícios</span><span>'+ico('calendar',16)+' '+clean(plan.days)+'</span></div></div></div><div class="efp-train-controls">'+primary('efm-start','▶ Iniciar treino','data-plan="'+plan.id+'"')+'<details class="efp-plan-details"><summary>Ver exercícios e adaptações</summary><div class="efp-plan-body"><p><strong>Intensidade:</strong> '+clean(plan.intensity)+'</p><p><strong>Em casa:</strong> '+clean(plan.equipment)+'</p><p><strong>Organização semanal:</strong> '+clean(plan.weekly)+'</p><ol>'+drillList+'</ol><p class="efp-plan-progress"><strong>Como evoluir:</strong> '+clean(plan.progress)+'</p></div></details></div></article>';
+  };
+  const sourceLinks=workout.sources.map(item=>'<a href="'+item.url+'" target="_blank" rel="noopener noreferrer">'+clean(item.name)+' ↗</a>').join('');
+  return '<div class="efp-page efp-training-page">'+heading('Treinos em casa','Escolha seu nível, respeite os descansos e acompanhe sua evolução.','treinos')+
+   '<section class="efp-levels" aria-label="Nível do treino"><h2>Seu nível de treino</h2><div class="efp-level-selector" role="group" aria-label="Selecionar nível">'+levels.map(l=>'<button type="button" data-action="efp-workout-level" data-level="'+l+'" aria-pressed="'+(level===l)+'" class="'+(level===l?'active':'')+'">'+l+'</button>').join('')+'</div><p>'+clean(descriptions[level])+'</p><div class="efp-level-highlights">'+highlights[level].map(x=>'<span>'+ico('check',15)+' '+x+'</span>').join('')+'</div></section>'+
+   '<section class="efp-surface efp-workout-method"><div><h3>Um programa que cabe na sua casa</h3><p>Sem máquinas, sem suplementos e sem necessidade de saltar. Uma cadeira firme, uma parede e espaço livre já ajudam nos movimentos propostos.</p></div><div><label for="efp-goal">O que você quer trabalhar?</label><select id="efp-goal"><option value="all" '+(P.goal==='all'?'selected':'')+'>Todos os objetivos</option>'+Object.entries(workout.GOALS).map(([g,name])=>'<option value="'+g+'" '+(P.goal===g?'selected':'')+'>'+clean(name)+'</option>').join('')+'</select></div></section>'+
+   sectionTitle('Programas para '+level.toLowerCase(),'<span class="efp-text-muted">'+plans.length+' planos</span>')+
+   '<div class="efp-programs">'+(plans.map(toCard).join('')||emptyUI('Sem planos neste filtro','Selecione outro objetivo para ver exercícios.'))+'</div>'+
+   '<section class="efp-surface efp-training-advice"><h3>Como treinar com segurança</h3><p><strong>Aqueça:</strong> comece devagar por 3–5 minutos. <strong>Respire:</strong> evite prender o ar nas repetições. <strong>Descanse:</strong> respeite as pausas descritas em cada plano. <strong>Progrida:</strong> mude apenas uma variável de cada vez, com boa execução.</p><p>Os tempos e as séries são sugestões educativas para adultos, não uma avaliação individual. Se você tem alguma condição de saúde, está retornando após longo período sem exercício ou sente sintomas, procure orientação profissional antes de fazer treinos intensos. Interrompa se houver dor no peito, tontura, mal-estar ou falta de ar fora do esperado.</p><details><summary>Progressão sugerida para 4 semanas</summary><div class="efp-plan-body"><p><strong>Semana 1:</strong> conheça o plano e faça apenas o volume confortável.</p><p><strong>Semana 2:</strong> mantenha a rotina, aprimorando a técnica e respeitando os descansos.</p><p><strong>Semana 3:</strong> se os movimentos estiverem fáceis, acrescente 1–2 repetições OU 5–10 segundos em um exercício.</p><p><strong>Semana 4:</strong> reavalie a recuperação. Não precisa subir de nível se ainda houver dificuldade.</p></div></details><details><summary>Entenda a base científica e as recomendações</summary><p>A OMS recomenda atividade aeróbica regular e fortalecimento muscular pelo menos duas vezes na semana. O ACSM (2026) reconhece que treinos com o próprio peso do corpo em casa podem trazer benefícios. Para esforço aeróbico moderado, o CDC usa o teste da conversa: conseguir falar, mas não cantar.</p><div class="efp-research-links">'+sourceLinks+'</div></details></section>'+
+   sectionTitle('Seus treinos realizados')+'<section class="efp-surface efp-history">'+(history.map(w=>'<div class="efp-history-row"><span class="efp-history-icon">'+ico('check',22)+'</span><div><strong>'+clean(w.title)+'</strong><small>'+shortDate(w.date)+' · '+count(w.minutes)+' min ativos</small></div></div>').join('')||emptyUI('Nenhum treino registrado','Conclua seu primeiro treino para criar seu histórico.'))+'</section></div>';
  }
  function premiumWalks(){
   const items=[...data.walks].sort((a,b)=>b.date.localeCompare(a.date));const week=thisWeek(items);const mins=week.reduce((s,w)=>s+Number(w.minutes||0),0);const distance=week.reduce((s,w)=>s+Number(w.distance||0),0);
@@ -141,10 +158,11 @@
  document.addEventListener('change',event=>{
   const id=event.target?.id;
   if(id==='efp-goal'){P.goal=event.target.value;render()}
-  if(id==='efp-level'){P.level=event.target.value;render()}
+  if(id==='efp-level'){P.level=event.target.value;window.EvoluWorkouts?.setPreferredLevel?.(P.level);render()}
  });
  document.addEventListener('click',event=>{
   const el=event.target.closest('[data-action]');if(!el)return;
+  if(el.dataset.action==='efp-workout-level'){P.level=el.dataset.level;window.EvoluWorkouts?.setPreferredLevel?.(P.level);P.goal='all';render();return}
   if(el.dataset.action==='efp-logout'){window.EvoluCloud?.signOut?.()}
   if(el.dataset.action==='efp-walk-form'||el.dataset.action==='efp-profile-form'){const target=document.getElementById(el.dataset.action);target?.scrollIntoView({block:'start',behavior:'smooth'});}
   if(el.dataset.action==='efp-password'){

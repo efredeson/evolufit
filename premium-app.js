@@ -12,7 +12,7 @@
  const count=(n)=>Number(n||0).toLocaleString('pt-BR',{maximumFractionDigits:1});
  const shortDate=d=>{try{return new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'short'}).format(new Date(d+'T12:00:00'))}catch{return clean(d)}};
  const greeting=()=>{const h=new Date().getHours();return h<12?'Bom dia':h<18?'Boa tarde':'Boa noite'};
- const firstName=()=>clean(String(data.profile?.name||'').trim().split(' ')[0]||'você');
+ const firstName=()=>clean(String(data.profile?.name||'').trim().split(' ')[0]||'');
  const todayWorkouts=()=>data.workouts.filter(x=>x.date===today());
  const todayWalks=()=>data.walks.filter(x=>x.date===today());
  const todayMeals=()=>data.mealDone[today()]||[];
@@ -41,17 +41,20 @@
  function premiumHome(){
   const habits=dailyHabits(),complete=habits.filter(Boolean).length,pct=complete*25;
   const plan=PLANS[0],water=waterCount(),done=todayMeals().length,walks=todayWalks(),walkDistance=walks.reduce((s,w)=>s+Number(w.distance||0),0);
-  return '<div class="efp-home">'+
-  '<div class="efp-greeting"><div><span class="efp-greeting-time">'+greeting()+',</span><h1>'+firstName()+'<span class="efp-green-dot">.</span></h1><p>Disciplina hoje, resultados amanhã.</p></div><span class="efp-greeting-mark">'+ico('meta',30)+'</span></div>'+
-  '<section class="efp-surface efp-home-hero"><div class="efp-hero-copy"><span class="efp-overline">RESUMO DE HOJE</span><h2>Sua evolução<br>começa agora.</h2><p>O progresso vem das pequenas conquistas.</p>'+primary('efm-start','▶ &nbsp; Começar treino','data-plan="inicio"')+'</div><div class="efp-hero-stats">'+ring(pct,'do dia')+'<strong>'+complete+' de 4 hábitos</strong><span>registrados hoje</span><div class="efp-hero-week">'+ico('meta',19)+' '+weekDays()+' dia(s) com atividade nesta semana</div></div></section>'+
+  const displayGreeting=greeting()+(firstName()?', '+firstName():'');
+  const legacy=location.hostname==='efredeson.github.io'?
+   '<aside class="efp-old-domain" role="note"><span>Você está no endereço antigo. Os dados locais ficam separados entre domínios.</span><a href="https://evolufit-lake.vercel.app/" target="_blank" rel="noopener noreferrer">Abrir na Vercel ›</a></aside>':'';
+  return '<div class="efp-home">'+legacy+
+  '<div class="efp-greeting"><div><h1>'+displayGreeting+'<span class="efp-green-dot">.</span></h1><p>Disciplina hoje, resultados amanhã.</p></div></div>'+ 
+  '<section class="efp-surface efp-home-hero"><div class="efp-hero-copy"><span class="efp-overline">RESUMO DO SEU DIA</span><h2>'+(complete?'Continue sua evolução.':'Um passo de cada vez.')+'</h2><p>'+(complete?'Você já concluiu '+complete+' de 4 hábitos hoje.':'Comece com um treino leve de '+plan.time+' minutos.')+'</p>'+primary('efm-start','▶ &nbsp; Começar treino','data-plan="inicio"')+'</div><div class="efp-hero-stats">'+ring(pct,'da rotina')+'<strong>'+complete+' de 4 hábitos</strong><span>concluídos hoje</span><div class="efp-hero-week">'+ico('meta',19)+' '+weekDays()+' de 7 dias ativos na semana</div></div></section>'+ 
   '<div class="efp-shortcuts">'+link('treinos','Treinos','Planos e exercícios')+link('caminhadas','Caminhadas','Registro e metas')+link('alimentacao','Alimentação','Refeições e água')+link('cronometro','Cronômetro','Seu tempo de treino')+'</div>'+
   sectionTitle('Treino recomendado',secLink('#treinos','Ver planos'))+
-  '<section class="efp-surface efp-feature-plan"><div class="efp-feature-image">'+photo('agachamento','Exemplo demonstrativo de exercício em casa')+'</div><div class="efp-feature-copy"><span class="efp-tag">PARA COMEÇAR</span><h3>'+clean(plan.title)+'</h3><p>'+clean(plan.desc)+'</p><div class="efp-feature-chips"><span>'+ico('clock',17)+' '+plan.time+' min</span><span>'+ico('treinos',17)+' '+plan.steps.length+' exercícios</span><span>'+clean(plan.level)+'</span></div>'+primary('efm-start','▶ &nbsp; Iniciar treino','data-plan="inicio"')+'</div></section>'+
+  '<section class="efp-surface efp-feature-plan"><div class="efp-feature-image"><img src="'+img('exercicios/agachamento-capa-premium.webp')+'" loading="lazy" alt="Pessoa demonstrando agachamento adaptado em casa"></div><div class="efp-feature-copy"><span class="efp-tag">PARA COMEÇAR</span><h3>'+clean(plan.title)+'</h3><p>'+clean(plan.desc)+'</p><div class="efp-feature-chips"><span>'+ico('clock',17)+' '+plan.time+' min</span><span>'+ico('treinos',17)+' '+plan.steps.length+' exercícios</span><span>'+clean(plan.level)+'</span></div>'+primary('efm-start','▶ &nbsp; Iniciar treino','data-plan="inicio"')+'</div></section>'+
   sectionTitle('Resumo do dia',secLink('#evolucao','Ver detalhes'))+
   '<div class="efp-stats-grid">'+[
+    ['agua','Água',water+' copo(s)','registrados',water?Math.min(100,water/8*100):0],
     ['alimentacao','Refeições',done+'/'+data.meals.length,'concluídas',data.meals.length?done/data.meals.length*100:0],
     ['caminhadas','Caminhada',walkDistance?count(walkDistance)+' km':walks.length+' registro(s)','hoje',walks.length?100:0],
-    ['clock','Água',water+' copo(s)','registrados',water?100:0],
     ['meta','Semana',weekDays()+'/7','dias ativos',weekDays()/7*100]
   ].map(([icon,label,num,unit,progress])=>'<a href="#'+(label==='Água'?'alimentacao':label==='Semana'?'evolucao':label==='Refeições'?'alimentacao':'caminhadas')+'" class="efp-surface efp-stat"><span class="efp-stat-symbol">'+ico(icon,23)+'</span><span>'+label+'</span><strong>'+num+'</strong><small>'+unit+'</small><i class="efp-mini-progress"><i style="width:'+round(progress)+'%"></i></i></a>').join('')+'</div></div>';
  }

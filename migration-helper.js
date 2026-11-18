@@ -31,8 +31,9 @@
  const baseLoadPhotos=loadPhotos;
  loadPhotos=async function(){
    await baseLoadPhotos();
-   if(!oldHost)return;
    const cards=[...document.querySelectorAll("#photo-list .photo-card")];
+   let photoRows=[];
+   try {photoRows=(await photoOp("get")).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));} catch(_) { /* fotos opcionais */ }
    for(const [i,card] of cards.entries()){
      const img=card.querySelector("img");
      const footer=card.querySelector("div");
@@ -41,7 +42,9 @@
      const link=document.createElement("a");
      link.className="btn secondary small efmig-photo-save";
      link.href=img.src;
-     link.download="evolufit-foto-"+date+"-"+(i+1)+".jpg";
+     const mime=String(photoRows[i]?.blob?.type||"");
+     const ext=mime.includes("png")?"png":mime.includes("webp")?"webp":"jpg";
+     link.download="evolufit-foto-"+date+"-"+(i+1)+"."+ext;
      link.textContent="⬇ Salvar foto";
      link.setAttribute("aria-label","Salvar foto de evolução "+date);
      footer.appendChild(link);

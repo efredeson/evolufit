@@ -1,0 +1,137 @@
+/* EvoluFit — layout responsivo v2. Isolado da lógica e dos dados. */
+:root{--ef-touch:44px}
+html{max-width:100%;overflow-x:clip;-webkit-text-size-adjust:100%}
+body{max-width:100%;overflow-x:clip;overscroll-behavior-x:none}
+.shell,.bodyarea,.main{min-width:0;max-width:100%}
+.main{width:min(1600px,100%)}
+.main :is(.grid,.cards,.two,.three,.formgrid,.efm-dashboard,.efm-core,.efm-rail,.efm-main-lower,.efm-evolution-main,.efm-achievements,.eforg-page,.eforg-two-column,.eforg-plan-grid,.eforg-timer-area)>*{min-width:0}
+.main :is(.card,.efm-card,.eforg-panel,.eforg-plan,.training,.photo-card){min-width:0;max-width:100%}
+.main :is(.cardhead,.listitem,.efm-progress-summary,.efm-notify-row,.eforg-history-item,.eforg-meal-row,.eforg-setting-link)>*{min-width:0}
+.main :is(h1,h2,h3,p,small,strong,.statnum,.hint,.eforg-setting-link,.efm-mission-item){overflow-wrap:break-word}
+.main img,.dialog img{max-width:100%}
+.main :is(.btn,button,input,select,textarea){max-width:100%}
+.efm-preview-content{grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:12px}
+.efm-preview-text,.efm-preview-controls,.efm-mission-item>div,.eforg-meal-body,.eforg-fold-text{min-width:0}
+.efm-preview-controls{flex-wrap:wrap}
+.efm-tabs{max-width:100%;width:max-content;overflow-x:auto;scrollbar-width:thin}
+.efm-tabs button{flex-shrink:0}
+.main .pageheading,.main .pageheading>div{min-width:0}
+.eforg-setting-link{overflow-wrap:anywhere}
+.eforg-photo-intro>div,.eforg-plan-body,.eforg-feature-left{min-width:0}
+.modal{max-width:100%;max-height:100dvh;overflow-y:auto;overscroll-behavior:contain}
+.dialog{max-width:100%;max-height:calc(100dvh - 26px);overscroll-behavior:contain}
+.toast{max-width:min(420px,calc(100vw - 24px));overflow-wrap:anywhere}
+@media(min-width:761px) and (max-width:1180px){
+ .sidebar{width:clamp(195px,20vw,225px)}
+ .sidebar .navlink{font-size:18px;gap:9px;padding-inline:9px}
+ .sidebar .efm-sidebar-logo img{max-height:94px}
+ .main{padding-inline:clamp(13px,2vw,24px)}
+ .efm-dashboard{grid-template-columns:minmax(0,1fr)}
+ .efm-rail{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .efm-rail .efm-notifications{grid-column:1/-1}
+ .efm-main-lower{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .eforg-two-column,.eforg-timer-area{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+ .shell,.bodyarea{width:100%}
+ .topbar{min-width:0;width:100%;gap:8px;padding-inline:clamp(10px,3.5vw,16px)}
+ .topbar .top-actions{gap:7px;min-width:0}
+ .topbar .mini-logo{min-width:0;letter-spacing:-.6px}
+ .main{width:100%;padding:14px clamp(12px,3.5vw,20px) calc(105px + env(safe-area-inset-bottom))}
+ .grid{gap:12px}
+ .card,.efm-card-padding,.eforg-panel{padding:clamp(13px,3.7vw,19px)}
+ .cards,.efm-actions,.ef-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .two,.three,.formgrid,.efm-evolution-main,.eforg-two-column,.eforg-timer-area{grid-template-columns:minmax(0,1fr)}
+ .pageheading{gap:10px;align-items:flex-start}
+ .main .pageheading{padding:19px 17px;min-height:0}
+ .main .pageheading>div{max-width:100%;width:100%}
+ .main .pageheading:after{opacity:.11;width:150px;right:-30px}
+ .main .pageheading>.btn{width:100%;max-width:100%;justify-content:center}
+ .main .pageheading h1{font-size:clamp(1.55rem,7vw,2rem);line-height:1.05}
+ .main .pageheading p{font-size:14px}
+ .cardhead{gap:9px}
+ .listitem{gap:10px;align-items:flex-start;flex-wrap:wrap}
+ .listitem .grow{flex:1 1 130px}
+ .listitem>.btn,.listitem>button{margin-left:auto}
+ .efm-actions{width:100%}
+ .efm-action{min-height:96px;padding:11px 6px}
+ .efm-action strong{font-size:clamp(17px,5.2vw,22px)}
+ .efm-preview-content{grid-template-columns:minmax(0,.87fr) minmax(0,1.13fr);gap:9px}
+ .efm-preview-photo{min-height:134px;max-height:190px}
+ .efm-preview-text{padding:4px 0;gap:6px}
+ .efm-preview-text h3{font-size:clamp(18px,5.4vw,24px)}
+ .efm-preview-controls{gap:5px}
+ .efm-round{flex-shrink:0}
+ .efm-achievements{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .efm-tabs{width:100%;justify-content:space-between;gap:4px}
+ .efm-tabs button{min-width:0;flex:1;padding:9px 12px;font-size:clamp(15px,4.2vw,19px)}
+ .efm-before-after{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .photo-card img{height:clamp(138px,39vw,185px)}
+ .photo-card div{padding:10px}
+ .timerbuttons,.eforg-clock-buttons,.eforg-secondary-actions{width:100%;gap:8px}
+ .timerbuttons>*{flex:1 1 calc(50% - 8px);justify-content:center}
+ .eforg-clock-buttons button{min-width:0;flex:1 1 120px}
+ .bottomnav{padding:6px 4px max(8px,env(safe-area-inset-bottom));gap:0}
+ .bottomnav a{min-width:0;flex:1 1 0;padding-inline:3px;line-height:1.2;white-space:nowrap;font-size:clamp(10px,2.7vw,12px)}
+ .bottomnav a b{flex:none}
+ .toast{bottom:calc(83px + env(safe-area-inset-bottom));left:12px;right:12px;width:auto;margin:auto;text-align:center}
+ .dialog{width:100%;padding:clamp(13px,4vw,22px);max-height:calc(100dvh - 30px)}
+ .dialog .formgrid{grid-template-columns:1fr}
+ .eforg-page{gap:12px}
+ .eforg-feature{min-width:0}
+ .eforg-plan{grid-template-columns:minmax(0,.4fr) minmax(0,.6fr)}
+ .eforg-plan>img{width:100%;height:100%;min-height:150px}
+ .eforg-plan-body h3{font-size:clamp(19px,5.8vw,25px)}
+ .eforg-plan-body p{font-size:13px}
+ .eforg-plan-meta span{white-space:normal}
+ .eforg-meal-row{gap:8px}
+ .eforg-fold-text{flex:1}
+ .eforg-setting-link{font-size:19px}
+ .eforg-setting-link strong{font-size:19px}
+ .eforg-photo-intro{padding:14px;gap:10px}
+ .eforg-photo-icon{width:66px;height:66px;flex:none}
+ .eforg-water-controls>*{flex:1 1 120px}
+}
+@media(max-width:380px){
+ .main{padding-inline:10px}
+ .topbar{padding-inline:10px}
+ .topbar .mini-logo{font-size:16px}
+ .efm-hero{grid-template-columns:minmax(0,36fr) minmax(0,64fr)}
+ .efm-hero-copy{padding:10px 10px 10px 0}
+ .efm-hero-copy .efm-display{font-size:clamp(23px,7vw,31px)}
+ .efm-hero-copy .efm-lede{font-size:11px}
+ .efm-hero-mascot img{width:100%}
+ .efm-mission-item{gap:8px}
+ .efm-mission-item .ef-brand-icon{width:34px!important;height:34px!important}
+ .efm-preview-content{grid-template-columns:minmax(0,41fr) minmax(0,59fr);gap:7px}
+ .efm-preview-photo{min-height:126px}
+ .efm-round{width:34px;height:34px}
+ .efm-round.efm-primary{width:42px;height:42px}
+ .efm-achievements{gap:7px}
+ .efm-award{padding:10px 6px}
+ .efm-award strong{font-size:18px}
+ .photo-grid{gap:8px}
+ .photo-card img{height:135px}
+ .eforg-feature{grid-template-columns:1fr}
+ .eforg-feature img{display:none}
+ .eforg-feature-left{padding:18px}
+ .eforg-plan{grid-template-columns:minmax(0,38fr) minmax(0,62fr)}
+ .eforg-plan-body{padding:9px}
+ .eforg-plan-body p{font-size:11px}
+ .eforg-plan-meta span{font-size:10px}
+ .eforg-plan-btn{font-size:13px;min-width:0;max-width:100%}
+ .eforg-meal-row{flex-wrap:wrap}
+ .eforg-checkbox{margin-left:auto}
+}
+@media(max-height:520px) and (orientation:landscape){
+ .dialog:has(.efm-guided){height:100dvh;overflow-y:auto}
+ .efm-guided{display:block;min-height:0}
+ .efm-guided-body{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ .efm-guided-media{min-height:110px}
+ .efm-guided-media img{height:35dvh}
+ .bottomnav{padding-block:3px}
+}
+@media(prefers-reduced-motion:reduce){
+ .sidebar,.efm-action{animation:none!important;transition:none!important}
+}

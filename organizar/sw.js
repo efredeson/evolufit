@@ -1,7 +1,7 @@
 /* EvoluFit TESTE - prévia independente do aplicativo principal.
    Guarda somente arquivos públicos; não armazena nem envia dados pessoais. */
-const CACHE="evolufit-organizar-pwa-v4-premium";
-const ASSETS=["../premium.css",
+const CACHE="evolufit-organizar-pwa-v5-workout-levels";
+const ASSETS=["../workout-library.js","../premium.css",
  "./","./index.html","./manifest.webmanifest","./app.js","./organize-ui.js","./organize-ui.css",
  "../ef-icons.js","../mission-ui.js","../mission-ui.css","../responsive.css","../styles.css","../theme-neon.css",
  "../assets/evolufit-gatinho-hd.webp","../assets/evolufit-marca-hd.webp",

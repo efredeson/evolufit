@@ -67,7 +67,7 @@
   const base=defaultData();
   const walks=d.walks.filter(x=>x&&dateOK(x.date)&&asNumber(x.minutes,1,1440)!==null).map(x=>({
     id:txt(x.id,80)||id(),date:x.date,minutes:Number(x.minutes),
-    distance:asNumber(x.distance,0,100),pace:txt(x.pace||"Leve",30)
+    distance:(x.distance===null||x.distance===undefined||x.distance==="")?null:asNumber(x.distance,0,100),pace:txt(x.pace||"Leve",30)
   }));
   const workouts=d.workouts.filter(x=>x&&dateOK(x.date)&&asNumber(x.minutes,0,1440)!==null).map(x=>({
     id:txt(x.id,80)||id(),date:x.date,minutes:Number(x.minutes),title:txt(x.title,100)

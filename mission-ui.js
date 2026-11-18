@@ -9,7 +9,7 @@
  const logo=assetBase+"assets/evolufit-marca-hd.webp";
  const guidePhoto=assetBase+"assets/exercicios/cadeira-foto.webp";
  const wanted=[["inicio","Início"],["treinos","Treinos"],["caminhadas","Caminhadas"],["alimentacao","Alimentação"],["cronometro","Cronômetro"],["evolucao","Minha evolução"],["fotos","Fotos"],["ajustes","Perfil"],["notificacoes","Notificações"]];
- const state={guided:null,guideInterval:null,tab:"progress",photos:[],starting:false};
+ const state={guided:null,guideInterval:null,restInterval:null,tab:"progress",photos:[],starting:false};
  const E=x=>es(x);
  const icon=(k,n=25)=>uiIcon(k,n);
  const arrow="›";
@@ -180,31 +180,56 @@
  }
  function showGuide(plan){
   if(!plan)return;
-  state.guided={plan,idx:0,accumulated:0,playing:false,startAt:0,totalMs:0};
+  state.guided={plan,idx:0,accumulated:0,playing:false,startAt:0,totalMs:0,restUntil:0};
   renderGuide();
+ }
+ function stopRestTicker(){if(state.restInterval){clearInterval(state.restInterval);state.restInterval=null}}
+ function displayRestClock(){
+  const g=state.guided,el=document.querySelector('#efm-rest-clock');if(!g||!el)return;
+  const remaining=Math.max(0,Math.ceil((g.restUntil-Date.now())/1000));
+  el.textContent=remaining?remaining+' s':'Pronto para continuar';
+  if(remaining===0)stopRestTicker();
+ }
+ function startGuideRest(){
+  const g=state.guided;if(!g)return;
+  const drill=window.EvoluWorkouts?.stepInfo(g.plan,g.idx);
+  const rest=drill?.rest??g.plan?.rest??60;
+  if(rest<=0)return;
+  stopRestTicker();g.restUntil=Date.now()+rest*1000;
+  displayRestClock();state.restInterval=setInterval(displayRestClock,400);
  }
  function renderGuide(){
   const g=state.guided;if(!g)return;
-  const step=g.plan.steps[g.idx],guide=exerciseGuide(step),src=exerciseImage(guide.kind);
-  const progress=g.plan.steps.map((s,i)=>'<span class="'+(i<=g.idx?"on":"")+'" aria-label="Etapa '+(i+1)+'"></span>').join("");
-  const photo=src?'<img src="'+src+'" alt="Duas posições ilustrativas do exercício '+E(step)+'">':
-   '<div class="efm-guided-placeholder">'+icon("treinos",60)+'<div>Imagem realista deste movimento em preparação.</div></div>';
-  const markup='<div class="efm-guided"><div><div class="efm-guided-header"><div>'+
-    '<div class="efm-kicker">'+E(g.plan.title)+' · Etapa '+(g.idx+1)+' de '+g.plan.steps.length+'</div>'+
-    '<h2>TREINO GUIADO</h2></div>'+
-    '<button class="btn secondary" type="button" data-action="efm-exit" aria-label="Sair do treino">✕ Fechar</button></div>'+
-    '<div class="efm-guide-progress">'+progress+'</div></div>'+
-    '<div class="efm-guided-body"><div class="efm-guided-media">'+photo+'</div>'+
-    '<div class="efm-guide-details"><div class="efm-kicker">MISSÃO EM ANDAMENTO</div>'+
-    '<h3>'+E(step)+'</h3><span id="efm-guide-clock" class="efm-guide-clock">'+formatClock(guideElapsed())+'</span>'+
-    '<div class="efm-guide-cue">'+E(guide.tip)+'</div>'+
-    '<div class="efm-guide-actions"><button class="btn secondary" data-action="efm-prev" '+(g.idx===0?"disabled":"")+'>‹ Anterior</button>'+
-    '<button class="btn" data-action="efm-play">'+(g.playing?"⏸ Pausar":"▶ Iniciar")+'</button>'+
-    '<button class="btn secondary" data-action="'+(g.idx===g.plan.steps.length-1?"efm-complete":"efm-next")+'">'+(g.idx===g.plan.steps.length-1?"✓ Concluir":"Próximo ›")+'</button></div></div></div>'+
-    '<div class="efm-guide-footer">Treino em casa · Adaptável ao seu ritmo. Pare se sentir dor, tontura ou falta de ar incomum.</div></div>';
-  if($("#modal")?.hidden!==false)showModal(markup);
-  else $("#modal").innerHTML='<div class="dialog" role="dialog" aria-modal="true" aria-label="Treino guiado">'+markup+'</div>';
+  const step=g.plan.steps[g.idx],drill=window.EvoluWorkouts?.stepInfo(g.plan,g.idx);
+  const fallback=exerciseGuide(step),name=drill?.name||step;
+  const src=drill?.kind?window.EvoluWorkouts?.imageUrl(drill.kind):exerciseImage(fallback.kind);
+  const tip=drill?.technique||fallback.tip;
+  const rest=drill?.rest??g.plan.rest??60;
+  const progress=g.plan.steps.map((s,i)=>'<span class="'+(i<=g.idx?'on':'')+'" aria-label="Etapa '+(i+1)+' de '+g.plan.steps.length+'"></span>').join('');
+  const photo=src?'<img src="'+src+'" alt="Demonstração do exercício '+E(name)+'">':
+   '<div class="efm-guided-placeholder">'+icon('treinos',60)+'<div>Realize o movimento seguindo as instruções.</div></div>';
+  const phase=drill?.phase||'Exercício';
+  const prescription=drill?.work||'';
+  const adaptations=drill?'<div class="efp-guide-alternatives"><div><strong>Mais leve</strong><p>'+E(drill.easier)+'</p></div><div><strong>Para progredir</strong><p>'+E(drill.harder)+'</p></div></div>':'';
+  const restRow=rest>0?'<div class="efp-guide-rest"><div><strong>Descanso entre séries</strong><small>'+rest+' segundos sugeridos</small></div><button type="button" class="btn secondary" data-action="efm-rest">⏲ Iniciar pausa</button><span id="efm-rest-clock" class="efp-rest-clock">'+(g.restUntil?'':'Quando precisar')+'</span></div>':'';
+  const markup='<div class="efm-guided"><div><div class="efm-guided-header"><div>'+ 
+    '<div class="efm-kicker">'+E(g.plan.title)+' · Exercício '+(g.idx+1)+' de '+g.plan.steps.length+'</div>'+ 
+    '<h2>TREINO EM CASA · '+E(g.plan.level)+'</h2></div>'+ 
+    '<button class="btn secondary" type="button" data-action="efm-exit" aria-label="Sair do treino">✕ Fechar</button></div>'+ 
+    '<div class="efm-guide-progress">'+progress+'</div></div>'+ 
+    '<div class="efm-guided-body"><div class="efm-guided-media">'+photo+'</div>'+ 
+    '<div class="efm-guide-details"><span class="efp-guide-phase">'+E(phase)+'</span>'+ 
+    '<h3>'+E(name)+'</h3><div class="efp-guide-prescription">'+E(prescription)+'</div>'+ 
+    '<div class="efp-guide-time-label">Tempo ativo da sessão</div><span id="efm-guide-clock" class="efm-guide-clock">'+formatClock(guideElapsed())+'</span>'+ 
+    '<div class="efm-guide-cue">'+E(tip)+'</div>'+adaptations+restRow+
+    '<div class="efm-guide-actions"><button class="btn secondary" data-action="efm-prev" '+(g.idx===0?'disabled':'')+'>‹ Anterior</button>'+ 
+    '<button class="btn" data-action="efm-play">'+(g.playing?'⏸ Pausar':'▶ Iniciar')+'</button>'+ 
+    '<button class="btn secondary" data-action="'+(g.idx===g.plan.steps.length-1?'efm-complete':'efm-next')+'">'+(g.idx===g.plan.steps.length-1?'✓ Concluir':'Próximo ›')+'</button></div></div></div>'+ 
+    '<div class="efm-guide-footer">'+E(g.plan.equipment||'Sem academia')+' · Expire durante o esforço; evite prender a respiração. Pare em caso de dor, tontura ou falta de ar incomum.</div></div>';
+  if($('#modal')?.hidden!==false)showModal(markup);
+  else $('#modal').innerHTML='<div class="dialog" role="dialog" aria-modal="true" aria-label="Treino guiado">'+markup+'</div>';
   displayGuideClock();
+  if(g.restUntil){displayRestClock();if(g.restUntil>Date.now()&&!state.restInterval)state.restInterval=setInterval(displayRestClock,400)}
   if(g.playing&&!state.guideInterval)state.guideInterval=setInterval(displayGuideClock,250);
  }
  function playGuide(){
@@ -213,16 +238,18 @@
   else{g.playing=true;g.startAt=Date.now();renderGuide();}
  }
  function stepGuide(delta){
-  const g=state.guided;if(!g)return;pauseGuide();g.totalMs+=g.accumulated;
+  const g=state.guided;if(!g)return;pauseGuide();stopRestTicker();g.restUntil=0;g.totalMs+=g.accumulated;
   g.idx=Math.max(0,Math.min(g.plan.steps.length-1,g.idx+delta));g.accumulated=0;renderGuide();
  }
- function exitGuide(){pauseGuide();state.guided=null;closeModal()}
+ function exitGuide(){pauseGuide();stopRestTicker();state.guided=null;closeModal()}
  function completeGuide(){
   const g=state.guided;if(!g||state.starting)return;
   state.starting=true;
   try {
    pauseGuide();
-   const realMinutes=Math.round((g.totalMs+g.accumulated)/6000)/10;
+   const activityMs=g.totalMs+g.accumulated;
+   if(activityMs<30000){toast("Inicie o cronômetro e realize pelo menos 30 segundos de atividade antes de concluir.");return}
+   const realMinutes=Math.round(activityMs/6000)/10;
    data.workouts.push({id:id(),date:today(),title:g.plan.title,minutes:realMinutes});
    save();exitGuide();render();toast("Missão concluída! Seu treino foi registrado. 💚");
   }finally{state.starting=false}
@@ -237,6 +264,7 @@
   switch(b.dataset.action){
    case "efm-start":e.preventDefault();showGuide(PLANS.find(p=>p.id===b.dataset.plan)||PLANS[0]);break;
    case "efm-play":e.preventDefault();playGuide();break;
+   case "efm-rest":e.preventDefault();startGuideRest();break;
    case "efm-prev":e.preventDefault();stepGuide(-1);break;
    case "efm-next":e.preventDefault();stepGuide(1);break;
    case "efm-complete":e.preventDefault();completeGuide();break;

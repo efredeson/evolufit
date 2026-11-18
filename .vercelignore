@@ -1,0 +1,7 @@
+# Exclui fontes nativas e infraestrutura que não pertencem ao site público.
+android-native/
+.github/
+README.md
+.vercel/
+*.apk
+*.zip

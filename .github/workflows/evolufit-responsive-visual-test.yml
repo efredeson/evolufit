@@ -1,0 +1,27 @@
+name: EvoluFit Web - pacote para testes responsivos
+on:
+  push:
+    branches:
+      - fix/mobile-login-responsive
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  empacotar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obter arquivos atuais do EvoluFit
+        uses: actions/checkout@v4
+      - name: Preparar fonte local para testes de viewport
+        run: |
+          mkdir -p /tmp/evolufit-test
+          cp index.html *.css *.js *.webmanifest /tmp/evolufit-test/
+          cp -R assets beta organizar /tmp/evolufit-test/
+          cd /tmp && zip -qr evolufit-web-responsive-test.zip evolufit-test
+      - name: Disponibilizar fonte para testes automatizados
+        uses: actions/upload-artifact@v4
+        with:
+          name: evolufit-web-responsive-test
+          path: /tmp/evolufit-web-responsive-test.zip
+          retention-days: 2
+          if-no-files-found: error

@@ -8,7 +8,7 @@ const date=new Date(),today=[date.getFullYear(),String(date.getMonth()+1).padSta
 const seed={profile:{name:'Teste',height:'175',goal:'75'},walks:[{id:'w1',date:today,minutes:32,distance:2.4,pace:'Moderado'}],workouts:[{id:'t1',date:today,title:'Comece no seu ritmo',minutes:12}],weights:[{id:'pw1',date:'2026-11-01',weight:80},{id:'pw2',date:today,weight:78.5}],water:{[today]:5},mealDone:{[today]:['cafe']}};
 (async()=>{
  await new Promise(ok=>server.listen(8765,'127.0.0.1',ok));
- const browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
+ const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',args:['--disable-dev-shm-usage','--no-sandbox']});
  const problems=[],results=[],sizes=[[320,700],[390,844],[768,1024],[1366,900]],views=['inicio','treinos','caminhadas','alimentacao','evolucao','fotos','cronometro','ajustes','notificacoes'];
  for(const [w,h] of sizes){
   const ctx=await browser.newContext({viewport:{width:w,height:h},deviceScaleFactor:1});

@@ -260,6 +260,7 @@
  evolution=customEvolution;
  modalTraining=showGuide;
  document.addEventListener("click",e=>{
+  if(e.target?.id==="modal"&&state.guided){exitGuide();return}
   const b=e.target.closest("[data-action]");if(!b)return;
   switch(b.dataset.action){
    case "efm-start":e.preventDefault();showGuide(PLANS.find(p=>p.id===b.dataset.plan)||PLANS[0]);break;

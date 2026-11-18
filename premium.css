@@ -299,3 +299,106 @@ p,.hint,.mini,.footnote{color:var(--efp-soft)}
  .efp-feature-copy{padding:9px 9px 9px 0}
  .efp-feature-copy h3{font-size:14px}
 }
+
+/* EvoluFit · Planos residenciais por nível · interface premium 2026 */
+.efp-training-page{gap:17px}
+.efp-levels{padding:19px 21px;background:#171b17;border:1px solid #343c34;border-radius:18px;display:grid;gap:11px}
+.efp-levels h2,.efp-training-advice h3,.efp-workout-method h3{margin:0;font-size:18px;font-weight:800;color:#f5f7f3}
+.efp-levels p,.efp-workout-method p,.efp-training-advice p{margin:0;font-size:13px;color:#bbc4b7;line-height:1.6}
+.efp-level-selector{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.efp-level-selector button{appearance:none;border:1px solid #485048;background:#242824;color:#e4e8e2;border-radius:11px;font-size:13px;font-weight:750;padding:12px 6px;min-height:46px;cursor:pointer;transition:background .15s,border-color .15s}
+.efp-level-selector button.active{background:#91dc4c;border-color:#a9e87b;color:#172212}
+.efp-level-selector button:not(.active):hover{border-color:#91dc4c;background:#293428}
+.efp-level-highlights{display:flex;gap:8px;flex-wrap:wrap}
+.efp-level-highlights span{display:inline-flex;gap:6px;align-items:center;border-radius:9px;padding:7px 10px;border:1px solid #3b473a;background:#202820;color:#d1dbcc;font-size:11px;font-weight:680}
+.efp-level-highlights .ef-brand-icon{height:14px!important;width:14px!important;color:#9cdb70}
+.efp-workout-method{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(220px,.7fr);gap:18px;padding:19px 21px;align-items:center}
+.efp-workout-method p{margin-top:6px}
+.efp-workout-method label{display:block;font-size:12px;font-weight:760;color:#ccd7c7;margin-bottom:7px}
+.efp-workout-method select{width:100%;min-height:47px;background:#252a25;border:1px solid #4b5649;color:#f2f5f0;font-size:13px}
+.efp-programs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:13px}
+.efp-train-program{overflow:hidden;min-width:0}
+.efp-train-header{padding:14px;display:grid;grid-template-columns:140px minmax(0,1fr);gap:14px;align-items:center}
+.efp-train-header>img{width:140px;height:140px;border-radius:12px;object-fit:cover;object-position:center;display:block;border:1px solid #464c41;background:#0d120d}
+.efp-train-summary{min-width:0;display:grid;gap:7px}
+.efp-training-label{font-size:10px;color:#a9d88e;font-weight:800;letter-spacing:.15px}
+.efp-train-summary h3{font-size:clamp(16px,2vw,21px);line-height:1.2;font-weight:800;color:#f5f8f2;margin:0}
+.efp-train-summary p{font-size:12px;line-height:1.4;color:#b7c0b6;margin:0}
+.efp-training-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:3px}
+.efp-training-chips span{display:inline-flex;gap:5px;align-items:center;font-size:10px;padding:5px 7px;border-radius:7px;background:#262c25;color:#d8e3d3;white-space:normal}
+.efp-training-chips .ef-brand-icon{height:14px!important;width:14px!important}
+.efp-train-controls{padding:0 14px 15px;display:grid;gap:10px}
+.efp-train-controls>.efp-primary{width:100%;min-height:42px}
+.efp-plan-details{border:1px solid #394639;background:#191e19;border-radius:12px;overflow:hidden;color:#dbe7d5}
+.efp-plan-details>summary,.efp-training-advice details>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer;padding:12px 13px;color:#d7e5d0;font-size:12px;font-weight:780}
+.efp-plan-details>summary:after,.efp-training-advice details>summary:after{content:'⌄';color:#9dda69;font-size:20px;line-height:1}
+.efp-plan-details[open]>summary:after,.efp-training-advice details[open]>summary:after{transform:rotate(180deg)}
+.efp-plan-details summary::-webkit-details-marker,.efp-training-advice summary::-webkit-details-marker{display:none}
+.efp-plan-body{padding:12px 14px 15px;border-top:1px solid #343b33;display:grid;gap:8px}
+.efp-plan-body>p{font-size:12px;color:#c5cec1;line-height:1.5;margin:0}
+.efp-plan-body p strong{color:#f1f6ef}
+.efp-plan-body ol{padding-left:20px;margin:5px 0 8px;display:grid;gap:12px}
+.efp-plan-body li{font-size:12px;line-height:1.5;color:#c8d5c2;padding-left:3px}
+.efp-drill-line{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 9px}
+.efp-drill-line>b{font-size:12px;color:#f4f8f1}
+.efp-drill-line>span{color:#a8e179;font-weight:730}
+.efp-plan-body li>p{margin:5px 0;color:#bbc8b6;font-size:12px}
+.efp-plan-body li>small{display:block;font-size:11px;color:#abb6a8;margin-top:3px}
+.efp-plan-body li>small b{color:#d2e5c9}
+.efp-plan-progress{padding:10px;border:1px solid #4d6247;border-radius:9px;background:#212b1e}
+.efp-training-advice{padding:21px;display:grid;gap:11px}
+.efp-training-advice details{margin-top:4px;background:#1d231d;border:1px solid #3d463b;border-radius:11px}
+.efp-training-advice details>p{padding:0 13px 10px;font-size:12px}
+.efp-research-links{display:grid;gap:6px;padding:0 13px 14px}
+.efp-research-links a{color:#a6e47a;text-decoration:underline;font-size:12px;overflow-wrap:anywhere}
+.efp-guide-phase{display:inline-flex;border-radius:8px;color:#a9e78b;background:#223020;border:1px solid #3a5936;padding:5px 9px;font-size:12px;font-weight:800}
+.efp-guide-prescription{display:inline-block;border-radius:8px;background:#2a3328;color:#e0f1d7;border:1px solid #4d6545;padding:7px 11px;font-weight:800;font-size:14px;margin:1px 0 8px}
+.efp-guide-time-label{font-size:11px;font-weight:730;color:#c1cdbd;margin-top:8px}
+.efp-guide-alternatives{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.efp-guide-alternatives>div{padding:12px;background:#202720;border:1px solid #3c493a;border-radius:12px}
+.efp-guide-alternatives strong{font-size:12px;color:#b6ea9b}
+.efp-guide-alternatives p{font-size:12px;color:#d4ded1;line-height:1.4;margin:5px 0 0}
+.efp-guide-rest{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:11px 0;padding:10px;background:#1a211b;border-radius:11px;border:1px solid #43523e}
+.efp-guide-rest>div{display:grid;gap:2px;flex:1 1 160px}
+.efp-guide-rest strong{font-size:12px;color:#eff6eb}
+.efp-guide-rest small{font-size:11px;color:#c1d1bc}
+.efp-guide-rest button{font-size:12px!important;padding:7px 9px;min-height:37px}
+.efp-rest-clock{font-size:12px;font-variant-numeric:tabular-nums;color:#a7e17b;font-weight:750;min-width:55px}
+.dialog:has(.efm-guided){max-height:96dvh!important;height:auto!important;overflow-y:auto!important}
+.efm-guided{grid-template-rows:auto auto auto;min-height:0}
+.efm-guided-body{align-items:start;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}
+.efm-guide-details h3{font-size:clamp(20px,2.7vw,30px);margin:9px 0}
+.efm-guide-clock{font-size:clamp(30px,4vw,47px);margin:6px 0;padding:8px 0}
+.efm-guide-cue{font-size:13px;line-height:1.5}
+.efm-guided-media img{max-height:380px;object-fit:contain}
+@media(max-width:1100px){.efp-programs{grid-template-columns:1fr}}
+@media(max-width:760px){
+ .efp-levels{padding:15px;gap:10px}.efp-levels h2{font-size:17px}
+ .efp-level-selector{gap:5px}.efp-level-selector button{padding:10px 3px;font-size:clamp(10px,2.85vw,13px);min-width:0}
+ .efp-level-highlights{gap:5px}.efp-level-highlights span{font-size:10px;padding:6px 8px}
+ .efp-workout-method{grid-template-columns:1fr;padding:15px;gap:13px}
+ .efp-workout-method h3{font-size:16px}
+ .efp-train-header{padding:12px;grid-template-columns:96px minmax(0,1fr);gap:10px}
+ .efp-train-header>img{height:110px;width:96px}
+ .efp-train-summary h3{font-size:16px}.efp-train-summary p{font-size:11px}
+ .efp-train-controls{padding:0 12px 12px}
+ .efp-training-chips span{font-size:10px;padding:4px 6px}
+ .efp-guide-alternatives{grid-template-columns:1fr}
+ .efm-guided-body{grid-template-columns:1fr}
+ .efm-guided-media{min-height:145px}
+ .efm-guided-media img{height:min(25dvh,205px);max-height:205px}
+ .efm-guided{gap:10px;padding:12px}
+ .efm-guide-details h3{font-size:23px;text-align:left}
+ .efm-guide-clock{font-size:35px}
+ .efp-guide-rest{gap:7px}
+ .efp-guide-rest>div{flex:1 1 100%}
+ .dialog:has(.efm-guided){height:100dvh!important;max-height:100dvh!important;border-radius:0!important}
+ .efm-guided-header h2{font-size:17px!important;line-height:1.25}
+ .efm-guide-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+ .efm-guide-actions button{min-width:0;font-size:11px!important;padding:9px 5px;min-height:42px}
+}
+@media(max-width:370px){
+ .efp-train-header{grid-template-columns:84px minmax(0,1fr);gap:8px}.efp-train-header>img{width:84px;height:100px}
+ .efp-drill-line{display:grid}
+ .efp-training-chips span{font-size:9px}
+}
